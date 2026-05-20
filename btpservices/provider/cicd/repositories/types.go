@@ -4,6 +4,7 @@ package cicdrepositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -220,6 +221,133 @@ func repositoriesDSItemsFrom(list []cicdmodels.Repository) (types.List, diag.Dia
 	result, d := types.ListValue(repositoriesDSItemType, items)
 	diags.Append(d...)
 	return result, diags
+}
+
+// ---------------------------------------------------------------------------
+// State models for repository jobs
+// ---------------------------------------------------------------------------
+
+type repositoryJobsDSModel struct {
+	Repository types.String `tfsdk:"repository"`
+	Values     types.List   `tfsdk:"values"`
+}
+
+type ansConfigDSModel struct {
+	Active       types.Bool   `tfsdk:"active"`
+	CredentialID types.String `tfsdk:"credential_id"`
+	CustomTag    types.String `tfsdk:"custom_tag"`
+}
+
+type notificationConfigDSModel struct {
+	ANS *ansConfigDSModel `tfsdk:"ans"`
+}
+
+type repositoryJobsDSItemModel struct {
+	ID                        types.String               `tfsdk:"id"`
+	Name                      types.String               `tfsdk:"name"`
+	Active                    types.Bool                 `tfsdk:"active"`
+	Description               types.String               `tfsdk:"description"`
+	Pipeline                  types.String               `tfsdk:"pipeline"`
+	PipelineVersion           types.String               `tfsdk:"pipeline_version"`
+	PipelineParameters        types.Map                  `tfsdk:"pipeline_parameters"`
+	BuildRetentionDays        types.Int64                `tfsdk:"build_retention_days"`
+	MaxBuildsToKeep           types.Int64                `tfsdk:"max_builds_to_keep"`
+	Branch                    types.String               `tfsdk:"branch"`
+	RepositoryID              types.String               `tfsdk:"repository_id"`
+	NotificationConfiguration *notificationConfigDSModel `tfsdk:"notification_configuration"`
+}
+
+var ansConfigAttrTypes = map[string]attr.Type{
+	"active":        types.BoolType,
+	"credential_id": types.StringType,
+	"custom_tag":    types.StringType,
+}
+
+var notificationConfigAttrTypes = map[string]attr.Type{
+	"ans": types.ObjectType{AttrTypes: ansConfigAttrTypes},
+}
+
+var repositoryJobsDSItemAttrTypes = map[string]attr.Type{
+	"id":               types.StringType,
+	"name":             types.StringType,
+	"active":           types.BoolType,
+	"description":      types.StringType,
+	"pipeline":         types.StringType,
+	"pipeline_version": types.StringType,
+	"pipeline_parameters": types.MapType{
+		ElemType: types.StringType,
+	},
+	"build_retention_days": types.Int64Type,
+	"max_builds_to_keep":   types.Int64Type,
+	"branch":               types.StringType,
+	"repository_id":        types.StringType,
+	"notification_configuration": types.ObjectType{
+		AttrTypes: notificationConfigAttrTypes,
+	},
+}
+
+var repositoryJobsDSItemType = types.ObjectType{AttrTypes: repositoryJobsDSItemAttrTypes}
+
+func repositoryJobsDSItemsFrom(ctx context.Context, list []cicdmodels.Job) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	items := make([]attr.Value, 0, len(list))
+
+	for _, j := range list {
+		item, d := repositoryJobsDSItemFrom(ctx, j)
+		diags.Append(d...)
+		if diags.HasError() {
+			return types.ListNull(repositoryJobsDSItemType), diags
+		}
+		items = append(items, item)
+	}
+
+	result, d := types.ListValue(repositoryJobsDSItemType, items)
+	diags.Append(d...)
+	return result, diags
+}
+
+func repositoryJobsDSItemFrom(ctx context.Context, j cicdmodels.Job) (attr.Value, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	paramElems := make(map[string]attr.Value, len(j.PipelineParameters))
+	for k, v := range j.PipelineParameters {
+		paramElems[k] = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	pipelineParams, d := types.MapValue(types.StringType, paramElems)
+	diags.Append(d...)
+	if diags.HasError() {
+		return types.ObjectNull(repositoryJobsDSItemAttrTypes), diags
+	}
+
+	item := repositoryJobsDSItemModel{
+		ID:                 types.StringValue(j.ID),
+		Name:               types.StringValue(j.Name),
+		Active:             types.BoolValue(j.Active),
+		Description:        types.StringValue(j.Description),
+		Pipeline:           types.StringValue(j.Pipeline),
+		PipelineVersion:    types.StringValue(j.PipelineVersion),
+		PipelineParameters: pipelineParams,
+		BuildRetentionDays: types.Int64Value(int64(j.BuildRetentionDays)),
+		MaxBuildsToKeep:    types.Int64Value(int64(j.MaxBuildsToKeep)),
+		Branch:             types.StringValue(j.Branch),
+		RepositoryID:       types.StringValue(j.RepositoryID),
+	}
+
+	if j.NotificationConfiguration != nil && j.NotificationConfiguration.ANS != nil {
+		item.NotificationConfiguration = &notificationConfigDSModel{
+			ANS: &ansConfigDSModel{
+				Active:       types.BoolValue(j.NotificationConfiguration.ANS.Active),
+				CredentialID: types.StringValue(j.NotificationConfiguration.ANS.CredentialID),
+				CustomTag:    types.StringValue(j.NotificationConfiguration.ANS.CustomTag),
+			},
+		}
+	} else {
+		item.NotificationConfiguration = &notificationConfigDSModel{ANS: nil}
+	}
+
+	obj, d := types.ObjectValueFrom(ctx, repositoryJobsDSItemAttrTypes, item)
+	diags.Append(d...)
+	return obj, diags
 }
 
 // ---------------------------------------------------------------------------

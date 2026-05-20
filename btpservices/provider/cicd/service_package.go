@@ -42,10 +42,10 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 		credentials.NewCredentialUsageDataSource,
 		credentials.NewJobCredentialsDataSource,
 
-
 		// Repository Datasources
 		repositories.NewRepositoryDataSource,
 		repositories.NewRepositoriesDataSource,
+		repositories.NewRepositoryJobsDataSource,
 		repositories.NewRepositoryEventReceiverDataSource,
 		repositories.NewRepositoryWebhookConfigDataSource,
 	}
