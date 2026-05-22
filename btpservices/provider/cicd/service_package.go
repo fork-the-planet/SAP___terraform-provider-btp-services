@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	credentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
+	jobs "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/jobs"
 	repositories "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/repositories"
 )
 
@@ -32,6 +33,9 @@ func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource 
 		// Repository Resources
 
 		repositories.NewRepositoryResource,
+
+		// Job Resources
+		jobs.NewJobResource,
 	}
 }
 
