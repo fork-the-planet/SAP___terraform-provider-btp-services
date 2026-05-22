@@ -38,7 +38,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 May 2026 06:44:57 GMT
+                - Fri, 22 May 2026 09:09:56 GMT
             Pragma:
                 - no-cache
             Server:
@@ -55,7 +55,7 @@ interactions:
                 - 1; mode=block
         status: 200 OK
         code: 200
-        duration: 923.514834ms
+        duration: 942.221584ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -91,7 +91,7 @@ interactions:
             Content-Type:
                 - application/hal+json;charset=UTF-8
             Date:
-                - Fri, 22 May 2026 06:44:58 GMT
+                - Fri, 22 May 2026 09:09:58 GMT
             Expires:
                 - "0"
             Pragma:
@@ -110,7 +110,7 @@ interactions:
                 - redacted-vcap-request-id
         status: 200 OK
         code: 200
-        duration: 896.541583ms
+        duration: 2.58364196s
     - id: 2
       request:
         proto: HTTP/1.1
@@ -148,7 +148,7 @@ interactions:
             Content-Security-Policy:
                 - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
             Date:
-                - Fri, 22 May 2026 06:44:59 GMT
+                - Fri, 22 May 2026 09:10:00 GMT
             Etag:
                 - W/"0"
             Expires:
@@ -171,7 +171,7 @@ interactions:
                 - redacted-vcap-request-id
         status: 201 Created
         code: 201
-        duration: 496.303333ms
+        duration: 1.847493626s
     - id: 3
       request:
         proto: HTTP/1.1
@@ -198,7 +198,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: false
-        body: '{"_embedded":{"triggers":[{"apiVersion":"v2","id":"0d7391b6-255a-47e7-9204-049019640b9e","type":"timer","timer":{"branch":"main","cron":"0 9 * * 1-5"},"_links":{"self":{"href":"redacted"}}}]},"_links":{"self":{"href":"redacted"}}}'
+        body: '{"_embedded":{"triggers":[{"apiVersion":"v2","id":"8e18bbf5-43f3-4e34-b379-f665eb25e3aa","type":"timer","timer":{"branch":"main","cron":"0 9 * * 1-5"},"_links":{"self":{"href":"redacted"}}}]},"_links":{"self":{"href":"redacted"}}}'
         headers:
             Cache-Control:
                 - no-cache, no-store, max-age=0, must-revalidate
@@ -207,7 +207,7 @@ interactions:
             Content-Type:
                 - application/hal+json;charset=UTF-8
             Date:
-                - Fri, 22 May 2026 06:44:59 GMT
+                - Fri, 22 May 2026 09:10:02 GMT
             Expires:
                 - "0"
             Pragma:
@@ -226,7 +226,7 @@ interactions:
                 - redacted-vcap-request-id
         status: 200 OK
         code: 200
-        duration: 353.461208ms
+        duration: 2.321639251s
     - id: 4
       request:
         proto: HTTP/1.1
@@ -243,7 +243,7 @@ interactions:
         headers:
             Authorization:
                 - redacted
-        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/0d7391b6-255a-47e7-9204-049019640b9e
+        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/8e18bbf5-43f3-4e34-b379-f665eb25e3aa
         method: GET
       response:
         proto: HTTP/2.0
@@ -253,7 +253,7 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: false
-        body: '{"apiVersion":"v2","id":"0d7391b6-255a-47e7-9204-049019640b9e","type":"timer","timer":{"branch":"main","cron":"0 9 * * 1-5"},"_links":{"self":{"href":"redacted"}}}'
+        body: '{"apiVersion":"v2","id":"8e18bbf5-43f3-4e34-b379-f665eb25e3aa","type":"timer","timer":{"branch":"main","cron":"0 9 * * 1-5"},"_links":{"self":{"href":"redacted"}}}'
         headers:
             Cache-Control:
                 - no-cache, must-revalidate, private
@@ -262,7 +262,7 @@ interactions:
             Content-Type:
                 - application/hal+json;charset=UTF-8
             Date:
-                - Fri, 22 May 2026 06:44:59 GMT
+                - Fri, 22 May 2026 09:10:03 GMT
             Etag:
                 - W/"0"
             Strict-Transport-Security:
@@ -279,7 +279,7 @@ interactions:
                 - redacted-vcap-request-id
         status: 200 OK
         code: 200
-        duration: 288.937959ms
+        duration: 340.773417ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -296,8 +296,63 @@ interactions:
         headers:
             Authorization:
                 - redacted
-        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/0d7391b6-255a-47e7-9204-049019640b9e
-        method: DELETE
+        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/8e18bbf5-43f3-4e34-b379-f665eb25e3aa
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"8e18bbf5-43f3-4e34-b379-f665eb25e3aa","type":"timer","timer":{"branch":"main","cron":"0 9 * * 1-5"},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Fri, 22 May 2026 09:10:04 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 1.424529834s
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 64
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"type":"timer","timer":{"branch":"main","cron":"0 10 * * 1-5"}}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/8e18bbf5-43f3-4e34-b379-f665eb25e3aa
+        method: PUT
       response:
         proto: HTTP/2.0
         proto_major: 2
@@ -313,7 +368,9 @@ interactions:
             Content-Security-Policy:
                 - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
             Date:
-                - Fri, 22 May 2026 06:45:00 GMT
+                - Fri, 22 May 2026 09:10:06 GMT
+            Etag:
+                - W/"1"
             Expires:
                 - "0"
             Pragma:
@@ -332,4 +389,216 @@ interactions:
                 - redacted-vcap-request-id
         status: 204 No Content
         code: 204
-        duration: 548.183583ms
+        duration: 2.112119209s
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/8e18bbf5-43f3-4e34-b379-f665eb25e3aa
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"8e18bbf5-43f3-4e34-b379-f665eb25e3aa","type":"timer","timer":{"branch":"main","cron":"0 10 * * 1-5"},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Fri, 22 May 2026 09:10:07 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 302.135208ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/8e18bbf5-43f3-4e34-b379-f665eb25e3aa
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"8e18bbf5-43f3-4e34-b379-f665eb25e3aa","type":"timer","timer":{"branch":"main","cron":"0 10 * * 1-5"},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Fri, 22 May 2026 09:10:07 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 304.059791ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/8e18bbf5-43f3-4e34-b379-f665eb25e3aa
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"8e18bbf5-43f3-4e34-b379-f665eb25e3aa","type":"timer","timer":{"branch":"main","cron":"0 10 * * 1-5"},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Fri, 22 May 2026 09:10:08 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 538.094542ms
+    - id: 10
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/tf-test-job/triggers/8e18bbf5-43f3-4e34-b379-f665eb25e3aa
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Fri, 22 May 2026 09:10:09 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 340.9445ms

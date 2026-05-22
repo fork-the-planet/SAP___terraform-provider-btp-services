@@ -31,7 +31,6 @@ func (r *webhookSecretResource) Metadata(_ context.Context, req resource.Metadat
 	resp.TypeName = fmt.Sprintf("%s_cicd_credential_webhook_secret", req.ProviderTypeName)
 }
 
-
 func (r *webhookSecretResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Webhook Secret credential in the SAP BTP CI/CD service.",

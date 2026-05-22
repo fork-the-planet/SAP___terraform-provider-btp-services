@@ -33,7 +33,8 @@ func (f *jobsFacade) ListByRepository(ctx context.Context, repositoryReference s
 }
 
 // CreateTrigger creates a new trigger under a job and returns the created trigger.
-// POST /v2/jobs/{job}/triggers returns 201 with no body, so we list before and after to find the new ID.
+// POST /v2/jobs/{job}/triggers returns 201 with no body and no Location header (per API spec),
+// so we list before and after to identify the newly created trigger by ID diff.
 func (f *jobsFacade) CreateTrigger(ctx context.Context, jobRef string, req cicdmodels.CreateTriggerRequest) (*cicdmodels.Trigger, error) {
 	before, err := f.ListTriggers(ctx, jobRef)
 	if err != nil {

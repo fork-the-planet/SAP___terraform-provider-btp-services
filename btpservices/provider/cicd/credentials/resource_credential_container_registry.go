@@ -31,7 +31,6 @@ func (r *containerRegistryResource) Metadata(_ context.Context, req resource.Met
 	resp.TypeName = fmt.Sprintf("%s_cicd_credential_container_registry", req.ProviderTypeName)
 }
 
-
 func (r *containerRegistryResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Container Registry configuration credential in the SAP BTP CI/CD service.",

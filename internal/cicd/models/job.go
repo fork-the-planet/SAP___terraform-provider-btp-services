@@ -26,9 +26,9 @@ type NotificationConfiguration struct {
 
 // AnsConfiguration holds the SAP Alert Notification Service settings for a job.
 type AnsConfiguration struct {
-	Active      bool   `json:"active"`
+	Active       bool   `json:"active"`
 	CredentialID string `json:"credentialId"`
-	CustomTag   string `json:"customTag,omitempty"`
+	CustomTag    string `json:"customTag,omitempty"`
 }
 
 // JobListResponse is the envelope returned by GET /v2/repositories/{reference}/jobs.

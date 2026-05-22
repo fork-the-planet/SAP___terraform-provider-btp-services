@@ -26,6 +26,7 @@ var _ resource.Resource = &buildTriggerResource{}
 var _ resource.ResourceWithConfigure = &buildTriggerResource{}
 var _ resource.ResourceWithImportState = &buildTriggerResource{}
 var _ resource.ResourceWithIdentity = &buildTriggerResource{}
+var _ resource.ResourceWithValidateConfig = &buildTriggerResource{}
 
 func NewBuildTriggerResource() resource.Resource {
 	return &buildTriggerResource{}
@@ -71,14 +72,17 @@ func (r *buildTriggerResource) Schema(_ context.Context, _ resource.SchemaReques
 				},
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: "Trigger type. Currently the only supported value is `timer`.",
+				MarkdownDescription: "Trigger type. Currently the only supported value is `timer`. Changing this forces recreation.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 				Validators: []validator.String{
 					stringvalidator.OneOf("timer"),
 				},
 			},
 			"timer": schema.SingleNestedAttribute{
-				MarkdownDescription: "Timer schedule configuration. Required when `type` is `TIMER`.",
+				MarkdownDescription: "Timer schedule configuration. Required when `type` is `timer`.",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
 					"branch": schema.StringAttribute{
@@ -120,6 +124,22 @@ func (r *buildTriggerResource) Configure(_ context.Context, req resource.Configu
 	r.cli = clients.Cicd
 }
 
+// ValidateConfig enforces that the timer block is set when type = "timer".
+func (r *buildTriggerResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data buildTriggerResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() || data.Type.IsUnknown() {
+		return
+	}
+	if data.Type.ValueString() == "timer" && data.Timer == nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("timer"),
+			"Missing Required Attribute",
+			`timer block is required when type is "timer".`,
+		)
+	}
+}
+
 func (r *buildTriggerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan buildTriggerResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -158,12 +178,15 @@ func (r *buildTriggerResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
+	var identity buildTriggerIdentityModel
+	diags := req.Identity.Get(ctx, &identity)
+	if diags.HasError() {
+		identity = buildTriggerIdentityModel{Job: state.Job, ID: state.ID}
+	}
+
 	updated := buildTriggerResourceValueFrom(state.Job.ValueString(), *result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, buildTriggerIdentityModel{
-		Job: state.Job,
-		ID:  state.ID,
-	})...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
 }
 
 func (r *buildTriggerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -212,20 +235,33 @@ func (r *buildTriggerResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 }
 
-// ImportState expects an import ID in "job_ref/trigger_id" format.
+// ImportState accepts either "job_ref/trigger_id" (string-based import) or an
+// identity-based import (Terraform 1.12+) where req.Identity carries job and id.
 func (r *buildTriggerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	parts := strings.SplitN(req.ID, "/", 2)
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Import ID",
-			fmt.Sprintf("Expected format: <job_id>/<trigger_id>, got: %q", req.ID),
-		)
+	if req.ID != "" {
+		parts := strings.SplitN(req.ID, "/", 2)
+		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+			resp.Diagnostics.AddError(
+				"Invalid Import ID",
+				fmt.Sprintf("Expected format: <job_id>/<trigger_id>, got: %q", req.ID),
+			)
+			return
+		}
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("job"), parts[0])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[1])...)
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, buildTriggerIdentityModel{
+			Job: types.StringValue(parts[0]),
+			ID:  types.StringValue(parts[1]),
+		})...)
 		return
 	}
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("job"), parts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[1])...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, buildTriggerIdentityModel{
-		Job: types.StringValue(parts[0]),
-		ID:  types.StringValue(parts[1]),
-	})...)
+	// Identity-based import (Terraform 1.12+): req.Identity carries job and id.
+	var job, id types.String
+	resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("job"), &job)...)
+	resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("id"), &id)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("job"), job)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 }

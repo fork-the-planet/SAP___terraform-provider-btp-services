@@ -40,11 +40,11 @@ resource "btpservice_cicd_build_trigger" "weekday_morning" {
 ### Required
 
 - `job` (String) Name or ID of the CI/CD job this trigger belongs to. Changing this forces recreation.
-- `type` (String) Trigger type. Currently the only supported value is `timer`.
+- `type` (String) Trigger type. Currently the only supported value is `timer`. Changing this forces recreation.
 
 ### Optional
 
-- `timer` (Attributes) Timer schedule configuration. Required when `type` is `TIMER`. (see [below for nested schema](#nestedatt--timer))
+- `timer` (Attributes) Timer schedule configuration. Required when `type` is `timer`. (see [below for nested schema](#nestedatt--timer))
 
 ### Read-Only
 

@@ -4,11 +4,13 @@ package cicdjobs_test
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"testing"
 
 	fwresource "github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	cicdjobs "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/jobs"
 	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
@@ -19,7 +21,7 @@ import (
 func TestResourceCicdBuildTrigger(t *testing.T) {
 	t.Parallel()
 
-	t.Run("happy path - timer trigger", func(t *testing.T) {
+	t.Run("happy path - create, update, and import", func(t *testing.T) {
 		t.Parallel()
 
 		rec, creds := utils.SetupVCR(t, "../fixtures/resource_build_trigger")
@@ -48,6 +50,35 @@ resource "btpservice_cicd_build_trigger" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_build_trigger.test", "timer.cron", "0 9 * * 1-5"),
 					),
 				},
+				{
+					// Step 2: Update cron schedule
+					Config: utils.HCLProviderBlock(creds) + `
+resource "btpservice_cicd_build_trigger" "test" {
+  job  = "tf-test-job"
+  type = "timer"
+  timer = {
+    branch = "main"
+    cron   = "0 10 * * 1-5"
+  }
+}
+`,
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("btpservice_cicd_build_trigger.test", "timer.cron", "0 10 * * 1-5"),
+					),
+				},
+				{
+					// Step 3: Import via composite "job/trigger_id" key derived from state
+					ResourceName:      "btpservice_cicd_build_trigger.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateIdFunc: func(s *terraform.State) (string, error) {
+						rs := s.RootModule().Resources["btpservice_cicd_build_trigger.test"]
+						if rs == nil {
+							return "", fmt.Errorf("resource not found in state")
+						}
+						return rs.Primary.Attributes["job"] + "/" + rs.Primary.Attributes["id"], nil
+					},
+				},
 			},
 		})
 	})
@@ -61,7 +92,10 @@ resource "btpservice_cicd_build_trigger" "test" {
 				{
 					Config: utils.HCLProviderBlock(utils.Redacted) + `
 resource "btpservice_cicd_build_trigger" "test" {
-  type = "TIMER"
+  type = "timer"
+  timer = {
+    cron = "0 9 * * 1-5"
+  }
 }
 `,
 					ExpectError: regexp.MustCompile(`The argument "job" is required`),
@@ -102,6 +136,25 @@ resource "btpservice_cicd_build_trigger" "test" {
 }
 `,
 					ExpectError: regexp.MustCompile(`value must be one of`),
+				},
+			},
+		})
+	})
+
+	t.Run("error - timer block required when type is timer", func(t *testing.T) {
+		t.Parallel()
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
+			Steps: []resource.TestStep{
+				{
+					Config: utils.HCLProviderBlock(utils.Redacted) + `
+resource "btpservice_cicd_build_trigger" "test" {
+  job  = "tf-test-job"
+  type = "timer"
+}
+`,
+					ExpectError: regexp.MustCompile(`timer block is required`),
 				},
 			},
 		})

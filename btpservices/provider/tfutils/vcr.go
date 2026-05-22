@@ -13,6 +13,7 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v3/cassette"
 	"gopkg.in/dnaeon/go-vcr.v3/recorder"
 )
+
 // TestCredentials is a generic key→value map of service config values.
 // Each service defines its own keys and redacted placeholder values.
 // Example keys for CI/CD: "endpoint", "token_url", "client_id", "client_secret".
