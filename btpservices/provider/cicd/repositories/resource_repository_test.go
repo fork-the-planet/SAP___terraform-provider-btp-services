@@ -197,8 +197,8 @@ resource "btpservice_cicd_repository" "test" {
 }
 `,
 					// PlanOnly stops after plan — validation passes, no API call is made.
-					PlanOnly:            true,
-					ExpectNonEmptyPlan:  true,
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
 				},
 			},
 		})

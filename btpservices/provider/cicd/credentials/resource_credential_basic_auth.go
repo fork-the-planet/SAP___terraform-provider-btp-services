@@ -31,7 +31,6 @@ func (r *basicAuthResource) Metadata(_ context.Context, req resource.MetadataReq
 	resp.TypeName = fmt.Sprintf("%s_cicd_credential_basic_auth", req.ProviderTypeName)
 }
 
-
 func (r *basicAuthResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Basic Authentication credential in the SAP BTP CI/CD service.",

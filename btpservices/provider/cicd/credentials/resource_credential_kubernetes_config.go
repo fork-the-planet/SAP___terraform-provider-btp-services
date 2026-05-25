@@ -31,7 +31,6 @@ func (r *kubernetesConfigResource) Metadata(_ context.Context, req resource.Meta
 	resp.TypeName = fmt.Sprintf("%s_cicd_credential_kubernetes_config", req.ProviderTypeName)
 }
 
-
 func (r *kubernetesConfigResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Kubernetes configuration credential in the SAP BTP CI/CD service.",
