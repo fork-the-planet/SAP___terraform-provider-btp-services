@@ -235,15 +235,15 @@ func (r *buildTriggerResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 }
 
-// ImportState accepts either "job_ref/trigger_id" (string-based import) or an
+// ImportState accepts either "job_ref,trigger_id" (string-based import) or an
 // identity-based import (Terraform 1.12+) where req.Identity carries job and id.
 func (r *buildTriggerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if req.ID != "" {
-		parts := strings.SplitN(req.ID, "/", 2)
+		parts := strings.SplitN(req.ID, ",", 2)
 		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 			resp.Diagnostics.AddError(
 				"Invalid Import ID",
-				fmt.Sprintf("Expected format: <job_id>/<trigger_id>, got: %q", req.ID),
+				fmt.Sprintf("Expected format: <job_id>,<trigger_id>, got: %q", req.ID),
 			)
 			return
 		}

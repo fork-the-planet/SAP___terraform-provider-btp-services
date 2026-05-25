@@ -76,7 +76,7 @@ resource "btpservice_cicd_build_trigger" "test" {
 						if rs == nil {
 							return "", fmt.Errorf("resource not found in state")
 						}
-						return rs.Primary.Attributes["job"] + "/" + rs.Primary.Attributes["id"], nil
+						return rs.Primary.Attributes["job"] + "," + rs.Primary.Attributes["id"], nil
 					},
 				},
 			},
