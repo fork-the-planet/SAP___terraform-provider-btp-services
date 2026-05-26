@@ -12,38 +12,15 @@ Manages a CI/CD job in the SAP BTP CI/CD service.
 ## Example Usage
 
 ```terraform
-# ---------------------------------------------------------------------------
-# Prerequisite: a repository the jobs will use
-# ---------------------------------------------------------------------------
-resource "btpservice_cicd_repository" "app_repo" {
-  name      = "my-app-repository"
-  clone_url = "https://github.com/example/my-app"
-}
-
-# ---------------------------------------------------------------------------
-# Credentials referenced by the pipeline parameters below
-# ---------------------------------------------------------------------------
-resource "btpservice_cicd_credential_basic_auth" "deploy_user" {
-  name     = "cf-deploy-user"
-  username = "deploy-user@example.com"
-  password = var.cf_deploy_password
-}
-
-resource "btpservice_cicd_credential_kubernetes_config" "kubeconfig" {
-  name        = "kube-config"
-  kube_config = var.kube_config
-}
-
-resource "btpservice_cicd_credential_secret_text" "sonar_token" {
-  name   = "sonar-token"
-  secret = var.sonar_token
-}
-
-resource "btpservice_cicd_credential_container_registry" "registry" {
-  name     = "container-registry"
-  username = var.registry_username
-  password = var.registry_password
-  server   = "https://docker.io"
+locals {
+  repository_id  = "fda133cb-9dae-4d8e-a64d-82fa105f7b2c"
+  deploy_cred    = "63c7a7a3-eb0e-436c-8f9d-21e14d113977"
+  sonar_cred     = "c734a875-92df-4dbf-af65-8ebac9a58cd9"
+  registry_cred  = "efbf4d27-5ac2-4717-b95f-cd5c20d16718"
+  kubeconfig_cred = "d794d687-3053-4cba-a942-88e6b13ef035"
+  ans_cred       = "2b19cbdf-ca27-47fb-980b-0c5e66b8c57d"
+  ctm_cred       = "b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce"
+  api_plan_key   = "c1e2f3a4-0000-0000-0000-111111111111"
 }
 
 # =============================================================================
@@ -54,7 +31,7 @@ resource "btpservice_cicd_credential_container_registry" "registry" {
 resource "btpservice_cicd_job" "cf_env_full" {
   name                 = "cf-full-pipeline"
   description          = "CF environment pipeline with all stages"
-  repository_id        = btpservice_cicd_repository.app_repo.id
+  repository_id        = local.repository_id
   branch               = "main"
   pipeline             = "cf-env"
   pipeline_version     = "3.0"
@@ -82,7 +59,7 @@ resource "btpservice_cicd_job" "cf_env_full" {
                 value: -Xmx2g
             credentialVariables:
               - name: NEXUS_PASSWORD
-                valueSource: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+                valueSource: ${local.deploy_cred}
         malwareScan:
           scan: true
         additionalTests:
@@ -95,13 +72,13 @@ resource "btpservice_cicd_job" "cf_env_full" {
             apiEndpoint: https://api.cf.us10.hana.ondemand.com
             org: my-org
             space: acceptance
-            credential: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+            credential: ${local.deploy_cred}
             mtaExtensionDescriptors:
               - mta-acc.mtaext
           webdriverIoTests:
             baseUrl: https://myapp-acc.cfapps.io
             npmScript: e2e
-            credential: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+            credential: ${local.deploy_cred}
             buildDescriptor: e2e/package.json
           runFirst:
             command: echo "Starting acceptance deploy"
@@ -113,38 +90,31 @@ resource "btpservice_cicd_job" "cf_env_full" {
                 value: acceptance
             credentialVariables:
               - name: ACC_API_KEY
-                valueSource: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+                valueSource: ${local.deploy_cred}
         compliance:
           sonarScan:
             mode: SonarCloud
             serverUrl: https://sonarcloud.io
             organization: my-org
             projectKey: my-org_my-project
-            tokenCredential: ${btpservice_cicd_credential_secret_text.sonar_token.id}
+            tokenCredential: ${local.sonar_cred}
         release:
           cfDeploy:
             strategy: blue-green
             apiEndpoint: https://api.cf.us10.hana.ondemand.com
             org: my-org
             space: production
-            credential: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+            credential: ${local.deploy_cred}
             mtaExtensionDescriptors:
               - mta-prod.mtaext
           cloudTransportManagement:
             nodeName: prod-ctm-node
-            credential: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+            credential: ${local.ctm_cred}
             nodeOperation: export
           runFirst:
             command: echo "Starting release"
           runLast:
             command: echo "Release complete"
-          _additional:
-            stringVariables:
-              - name: TARGET_ENV
-                value: production
-            credentialVariables:
-              - name: PROD_API_KEY
-                valueSource: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
       lifeCycle:
         afterAllStages:
           command: echo "Pipeline finished"
@@ -154,41 +124,12 @@ resource "btpservice_cicd_job" "cf_env_full" {
 }
 
 # =============================================================================
-# Pipeline type: cf-env — pipeline_parameters loaded from a YAML file
-# Use file() when the pipeline config is large, shared across jobs, or managed
-# separately from the Terraform configuration.
-#
-# Create a file named cf_pipeline_params.yaml next to this .tf file with the
-# full pipeline parameters YAML. Credential IDs must be hardcoded in the file
-# because file() reads raw content with no variable substitution. Example:
-#
-#   configurationSource: job_parameter
-#   cfEnvConfiguration:
-#     stages:
-#       build:
-#         buildTool: mta
-#         buildToolVersion: MBTJ21N24
-#         runFirst:
-#           command: echo "Starting build"
-#         _additional:
-#           stringVariables:
-#             - name: MAVEN_OPTS
-#               value: -Xmx2g
-#           credentialVariables:
-#             - name: NEXUS_PASSWORD
-#               valueSource: <credential-id>
-#       release:
-#         cfDeploy:
-#           strategy: blue-green
-#           apiEndpoint: https://api.cf.us10.hana.ondemand.com
-#           org: my-org
-#           space: production
-#           credential: <credential-id>
+# Pipeline type: cf-env — pipeline config read from the source repository
 # =============================================================================
-resource "btpservice_cicd_job" "cf_env_from_file" {
-  name                 = "cf-from-file"
-  description          = "Pipeline parameters loaded from an external YAML file"
-  repository_id        = btpservice_cicd_repository.app_repo.id
+resource "btpservice_cicd_job" "cf_source_repo" {
+  name                 = "cf-source-repository"
+  description          = "Pipeline config is read from .pipeline/config.yml in the repo"
+  repository_id        = local.repository_id
   branch               = "main"
   pipeline             = "cf-env"
   pipeline_version     = "3.0"
@@ -196,74 +137,20 @@ resource "btpservice_cicd_job" "cf_env_from_file" {
   build_retention_days = 28
   max_builds_to_keep   = 10
 
-  pipeline_parameters = file("${path.module}/cf_pipeline_params.yaml")
-}
-
-# =============================================================================
-# Pipeline type: cf-env — pipeline_parameters rendered from a template file
-# Use templatefile() to inject credential IDs (or any Terraform value) into
-# the YAML at plan time, avoiding hardcoded IDs in the YAML file itself.
-#
-# Create a file named cf_pipeline_params.tftpl next to this .tf file using
-# ${variable_name} placeholders for any value you want to inject. Example:
-#
-#   configurationSource: job_parameter
-#   cfEnvConfiguration:
-#     stages:
-#       build:
-#         buildTool: mta
-#         buildToolVersion: MBTJ21N24
-#         runFirst:
-#           command: echo "Starting build"
-#         _additional:
-#           stringVariables:
-#             - name: MAVEN_OPTS
-#               value: -Xmx2g
-#           credentialVariables:
-#             - name: NEXUS_PASSWORD
-#               valueSource: ${deploy_cred}
-#       release:
-#         cfDeploy:
-#           strategy: blue-green
-#           apiEndpoint: https://api.cf.us10.hana.ondemand.com
-#           org: my-org
-#           space: production
-#           credential: ${deploy_cred}
-#       compliance:
-#         sonarScan:
-#           mode: SonarCloud
-#           serverUrl: https://sonarcloud.io
-#           organization: my-org
-#           projectKey: my-org_my-project
-#           tokenCredential: ${sonar_cred}
-# =============================================================================
-resource "btpservice_cicd_job" "cf_env_from_template" {
-  name                 = "cf-from-template"
-  description          = "Pipeline parameters rendered from a template file via templatefile()"
-  repository_id        = btpservice_cicd_repository.app_repo.id
-  branch               = "main"
-  pipeline             = "cf-env"
-  pipeline_version     = "3.0"
-  active               = true
-  build_retention_days = 28
-  max_builds_to_keep   = 10
-
-  pipeline_parameters = templatefile("${path.module}/cf_pipeline_params.tftpl", {
-    deploy_cred = btpservice_cicd_credential_basic_auth.deploy_user.id
-    sonar_cred  = btpservice_cicd_credential_secret_text.sonar_token.id
-  })
+  pipeline_parameters = <<-YAML
+    configurationSource: source_repository
+  YAML
 }
 
 # =============================================================================
 # Pipeline type: kyma-cnb  (Kyma Runtime — Cloud Native Buildpacks)
-# Full pipeline — all stages, multiple images with exportHelmValues, helmValues
-# overrides (literal + file source), runFirst/runLast, _additional credential
-# and string variables across build, acceptance, compliance, and release.
+# Full pipeline — all stages, multiple images, helmValues overrides,
+# runFirst/runLast, _additional variables across build/acceptance/release.
 # =============================================================================
 resource "btpservice_cicd_job" "kyma_cnb_full" {
   name                 = "kyma-full-pipeline"
   description          = "Kyma CNB pipeline with all stages"
-  repository_id        = btpservice_cicd_repository.app_repo.id
+  repository_id        = local.repository_id
   branch               = "main"
   pipeline             = "kyma-cnb"
   pipeline_version     = "1.0"
@@ -300,12 +187,7 @@ resource "btpservice_cicd_job" "kyma_cnb_full" {
           cnb:
             containerRegistry:
               url: https://docker.io/myuser
-              credential: ${btpservice_cicd_credential_container_registry.registry.id}
-          helmDependencyUpdate:
-            active: true
-            sourceRepositories:
-              - name: my-helm-repo
-                url: https://charts.example.com
+              credential: ${local.registry_cred}
           runFirst:
             command: npm ci --prefer-offline
           runLast:
@@ -314,21 +196,16 @@ resource "btpservice_cicd_job" "kyma_cnb_full" {
             stringVariables:
               - name: NODE_ENV
                 value: production
-              - name: APP_VERSION
-                value: "2.0.0"
             credentialVariables:
               - name: NPM_TOKEN
-                valueSource: ${btpservice_cicd_credential_container_registry.registry.id}
+                valueSource: ${local.registry_cred}
         additionalTest:
           active: true
           npmExecuteScriptsRunScript: test
-          _additional:
-            credentialVariables: []
-            stringVariables: []
         acceptance:
           active: true
           deploy:
-            kubeConfigFileCredential: ${btpservice_cicd_credential_kubernetes_config.kubeconfig.id}
+            kubeConfigFileCredential: ${local.kubeconfig_cred}
             namespace: staging
             helmReleaseName: my-app-staging
             helmValueFiles:
@@ -337,12 +214,6 @@ resource "btpservice_cicd_job" "kyma_cnb_full" {
               - path: replicaCount
                 value: "2"
                 source: literal
-              - path: resources.limits.memory
-                value: 256Mi
-                source: literal
-              - path: config.secretFile
-                value: secrets/staging.yaml
-                source: file
           webdriverIoTest:
             active: true
             npmScript: wdi5
@@ -351,13 +222,6 @@ resource "btpservice_cicd_job" "kyma_cnb_full" {
             command: echo "Starting acceptance deploy"
           runLast:
             command: echo "Acceptance tests done"
-          _additional:
-            stringVariables:
-              - name: TARGET_ENV
-                value: staging
-            credentialVariables:
-              - name: STAGING_SECRET
-                valueSource: ${btpservice_cicd_credential_kubernetes_config.kubeconfig.id}
         compliance:
           sonarExecuteScan:
             active: true
@@ -365,11 +229,11 @@ resource "btpservice_cicd_job" "kyma_cnb_full" {
             serverUrl: https://sonarcloud.io
             organization: my-org
             projectKey: my-org_my-project
-            tokenCredential: ${btpservice_cicd_credential_secret_text.sonar_token.id}
+            tokenCredential: ${local.sonar_cred}
         release:
           active: true
           deploy:
-            kubeConfigFileCredential: ${btpservice_cicd_credential_kubernetes_config.kubeconfig.id}
+            kubeConfigFileCredential: ${local.kubeconfig_cred}
             namespace: production
             helmReleaseName: my-app-prod
             helmValueFiles:
@@ -378,26 +242,10 @@ resource "btpservice_cicd_job" "kyma_cnb_full" {
               - path: replicaCount
                 value: "5"
                 source: literal
-              - path: resources.limits.cpu
-                value: "1000m"
-                source: literal
-              - path: resources.limits.memory
-                value: 512Mi
-                source: literal
-              - path: config.secretFile
-                value: secrets/prod.yaml
-                source: file
           runFirst:
             command: echo "Starting production release"
           runLast:
             command: echo "Release complete"
-          _additional:
-            stringVariables:
-              - name: TARGET_ENV
-                value: production
-            credentialVariables:
-              - name: PROD_SECRET
-                valueSource: ${btpservice_cicd_credential_kubernetes_config.kubeconfig.id}
   YAML
 }
 
@@ -408,7 +256,7 @@ resource "btpservice_cicd_job" "kyma_cnb_full" {
 resource "btpservice_cicd_job" "cpi_full" {
   name                 = "cpi-full-pipeline"
   description          = "Integration Suite pipeline with all stages"
-  repository_id        = btpservice_cicd_repository.app_repo.id
+  repository_id        = local.repository_id
   branch               = "main"
   pipeline             = "cpi"
   pipeline_version     = "2.0"
@@ -421,7 +269,7 @@ resource "btpservice_cicd_job" "cpi_full" {
     cpiConfiguration:
       common:
         integrationFlowId: MyIntegrationFlow
-        apiPlanServiceKey: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+        apiPlanServiceKey: ${local.api_plan_key}
       stages:
         upload:
           integrationFlowName: My Integration Flow Name
@@ -431,81 +279,20 @@ resource "btpservice_cicd_job" "cpi_full" {
           active: true
         integrationTests:
           active: true
-          integrationFlowPlanServiceKey: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+          integrationFlowPlanServiceKey: ${local.api_plan_key}
           contentType: application/json
           messageBodyPath: test/payload.json
   YAML
 }
 
 # =============================================================================
-# notification_configuration — ANS (SAP Alert Notification Service)
-# Attach an ANS credential to a job so build events are forwarded to the
-# Alert Notification Service. The credential must already exist.
-# =============================================================================
-resource "btpservice_cicd_credential_basic_auth" "ans_credential" {
-  name        = "ans-service-key"
-  description = "ANS service key credential"
-  username    = "ans-client-id"
-  password    = var.ans_client_secret
-}
-
-resource "btpservice_cicd_job" "cf_with_ans" {
-  name                 = "cf-pipeline-with-ans"
-  description          = "CF pipeline that sends build notifications via ANS"
-  repository_id        = btpservice_cicd_repository.app_repo.id
-  branch               = "main"
-  pipeline             = "cf-env"
-  pipeline_version     = "3.0"
-  active               = true
-  build_retention_days = 28
-  max_builds_to_keep   = 10
-
-  pipeline_parameters = <<-YAML
-    configurationSource: source_repository
-  YAML
-
-  notification_configuration = {
-    ans = {
-      active        = true
-      credential_id = btpservice_cicd_credential_basic_auth.ans_credential.id
-      custom_tag    = "my-team"
-    }
-  }
-}
-
-# Disable ANS notifications without removing the configuration block.
-resource "btpservice_cicd_job" "cf_ans_disabled" {
-  name                 = "cf-pipeline-ans-off"
-  description          = "CF pipeline with ANS notifications disabled"
-  repository_id        = btpservice_cicd_repository.app_repo.id
-  branch               = "main"
-  pipeline             = "cf-env"
-  pipeline_version     = "3.0"
-  active               = true
-  build_retention_days = 28
-  max_builds_to_keep   = 10
-
-  pipeline_parameters = <<-YAML
-    configurationSource: source_repository
-  YAML
-
-  notification_configuration = {
-    ans = {
-      active        = false
-      credential_id = btpservice_cicd_credential_basic_auth.ans_credential.id
-    }
-  }
-}
-
-# =============================================================================
 # Pipeline type: sap-ui5-abap-fes  (SAP UI5 for ABAP Platform / Fiori)
-# Full pipeline — all stages, build tool version, lint, additional test,
-# malware scan, SonarCloud compliance, release with transport request.
+# Full pipeline — all stages, lint, malware scan, SonarCloud, release.
 # =============================================================================
 resource "btpservice_cicd_job" "ui5_full" {
   name                 = "ui5-full-pipeline"
   description          = "UI5 pipeline deploying to ABAP FES with all stages"
-  repository_id        = btpservice_cicd_repository.app_repo.id
+  repository_id        = local.repository_id
   branch               = "main"
   pipeline             = "sap-ui5-abap-fes"
   pipeline_version     = "1.0"
@@ -531,13 +318,10 @@ resource "btpservice_cicd_job" "ui5_full" {
               value: production
           credentialVariables:
             - name: NPM_TOKEN
-              valueSource: ${btpservice_cicd_credential_container_registry.registry.id}
+              valueSource: ${local.registry_cred}
       additionalTest:
         active: true
         npmExecuteScriptsRunScript: test
-        _additional:
-          credentialVariables: []
-          stringVariables: []
       runMalwareScan: true
       compliance:
         sonarExecuteScan:
@@ -546,20 +330,46 @@ resource "btpservice_cicd_job" "ui5_full" {
           serverUrl: https://sonarcloud.io
           organization: my-org
           projectKey: my-ui5-project-key
-          tokenCredential: ${btpservice_cicd_credential_secret_text.sonar_token.id}
+          tokenCredential: ${local.sonar_cred}
       release:
         active: true
         abapEndpoint: https://your-abap-system.com
         abapPackage: Z_UI5_RESOURCES
         applicationName: Z_CUSTOM_APP
         applicationDescription: Deployment via CI/CD Service
-        uploadCredential: ${btpservice_cicd_credential_basic_auth.deploy_user.id}
+        uploadCredential: ${local.deploy_cred}
         transportRequestIdSource: parameter
         transportRequestId: S4HK900001
-        _additional:
-          credentialVariables: []
-          stringVariables: []
   YAML
+}
+
+# =============================================================================
+# notification_configuration — ANS (SAP Alert Notification Service)
+# Attach an ANS credential so build events are forwarded to the
+# Alert Notification Service.
+# =============================================================================
+resource "btpservice_cicd_job" "cf_with_ans" {
+  name                 = "cf-pipeline-with-ans"
+  description          = "CF pipeline that sends build notifications via ANS"
+  repository_id        = local.repository_id
+  branch               = "main"
+  pipeline             = "cf-env"
+  pipeline_version     = "3.0"
+  active               = true
+  build_retention_days = 28
+  max_builds_to_keep   = 10
+
+  pipeline_parameters = <<-YAML
+    configurationSource: source_repository
+  YAML
+
+  notification_configuration = {
+    ans = {
+      active        = true
+      credential_id = local.ans_cred
+      custom_tag    = "my-team"
+    }
+  }
 }
 ```
 
