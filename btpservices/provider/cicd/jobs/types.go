@@ -13,18 +13,18 @@ import (
 
 // jobResourceModel is the Terraform state model for the job resource.
 type jobResourceModel struct {
-	ID                        types.String                        `tfsdk:"id"`
-	Name                      types.String                        `tfsdk:"name"`
-	Description               types.String                        `tfsdk:"description"`
-	Active                    types.Bool                          `tfsdk:"active"`
-	Pipeline                  types.String                        `tfsdk:"pipeline"`
-	PipelineVersion           types.String                        `tfsdk:"pipeline_version"`
-	PipelineParameters        types.String                        `tfsdk:"pipeline_parameters"`
-	BuildRetentionDays        types.Int64                         `tfsdk:"build_retention_days"`
-	MaxBuildsToKeep           types.Int64                         `tfsdk:"max_builds_to_keep"`
-	Branch                    types.String                        `tfsdk:"branch"`
-	RepositoryID              types.String                        `tfsdk:"repository_id"`
-	NotificationConfiguration *notificationConfigurationModel     `tfsdk:"notification_configuration"`
+	ID                        types.String                    `tfsdk:"id"`
+	Name                      types.String                    `tfsdk:"name"`
+	Description               types.String                    `tfsdk:"description"`
+	Active                    types.Bool                      `tfsdk:"active"`
+	Pipeline                  types.String                    `tfsdk:"pipeline"`
+	PipelineVersion           types.String                    `tfsdk:"pipeline_version"`
+	PipelineParameters        types.String                    `tfsdk:"pipeline_parameters"`
+	BuildRetentionDays        types.Int64                     `tfsdk:"build_retention_days"`
+	MaxBuildsToKeep           types.Int64                     `tfsdk:"max_builds_to_keep"`
+	Branch                    types.String                    `tfsdk:"branch"`
+	RepositoryID              types.String                    `tfsdk:"repository_id"`
+	NotificationConfiguration *notificationConfigurationModel `tfsdk:"notification_configuration"`
 }
 
 type notificationConfigurationModel struct {

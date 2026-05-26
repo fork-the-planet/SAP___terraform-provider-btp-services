@@ -570,7 +570,7 @@ resource "btpservice_cicd_job" "ui5_full" {
 
 - `active` (Boolean) Whether the job is active. Inactive jobs cannot be executed.
 - `branch` (String) Branch pattern for the job. Required when `repository_id` is set.
-- `build_retention_days` (Number) Number of days build artifacts are retained.
+- `build_retention_days` (Number) Number of days build artifacts are retained. Must be between 1 and 28 (inclusive).
 - `max_builds_to_keep` (Number) Maximum number of builds retained for this job.
 - `name` (String) Name of the job. Must match `[a-zA-Z0-9_-]{1,64}`.
 - `pipeline` (String) Pipeline type. One of: `cpi`, `cf-env`, `kyma-cnb`, `sap-ui5-abap-fes`.

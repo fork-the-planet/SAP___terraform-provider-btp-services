@@ -31,7 +31,6 @@ func (r *cloudConnectorResource) Metadata(_ context.Context, req resource.Metada
 	resp.TypeName = fmt.Sprintf("%s_cicd_credential_cloud_connector", req.ProviderTypeName)
 }
 
-
 func (r *cloudConnectorResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a Cloud Connector credential in the SAP BTP CI/CD service.",
