@@ -31,11 +31,11 @@ func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource 
 		credentials.NewSecretTextResource,
 
 		// Repository Resources
-
 		repositories.NewRepositoryResource,
 
 		// Job Resources
 		jobs.NewJobResource,
+		jobs.NewBuildTriggerResource,
 	}
 }
 
