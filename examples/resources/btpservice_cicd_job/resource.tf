@@ -110,6 +110,96 @@ resource "btpservice_cicd_job" "cf_env_full" {
 }
 
 # =============================================================================
+# Pipeline type: cf-env — pipeline_parameters loaded from a YAML file
+# Use file() when the pipeline config is large or managed separately.
+#
+# Create a file named cf_pipeline_params.yaml next to this .tf file with the
+# full pipeline parameters YAML. Credential IDs must be hardcoded in the file
+# because file() reads raw content with no variable substitution. Example:
+#
+#   configurationSource: job_parameter
+#   cfEnvConfiguration:
+#     stages:
+#       build:
+#         buildTool: mta
+#         buildToolVersion: MBTJ21N24
+#         _additional:
+#           credentialVariables:
+#             - name: NEXUS_PASSWORD
+#               valueSource: <credential-id>
+#       release:
+#         cfDeploy:
+#           strategy: blue-green
+#           apiEndpoint: https://api.cf.us10.hana.ondemand.com
+#           org: my-org
+#           space: production
+#           credential: <credential-id>
+# =============================================================================
+resource "btpservice_cicd_job" "cf_env_from_file" {
+  name                 = "cf-from-file"
+  description          = "Pipeline parameters loaded from an external YAML file"
+  repository_id        = local.repository_id
+  branch               = "main"
+  pipeline             = "cf-env"
+  pipeline_version     = "3.0"
+  active               = true
+  build_retention_days = 28
+  max_builds_to_keep   = 10
+
+  pipeline_parameters = file("${path.module}/cf_pipeline_params.yaml")
+}
+
+# =============================================================================
+# Pipeline type: cf-env — pipeline_parameters rendered from a template file
+# Use templatefile() to inject credential IDs (or any Terraform value) into
+# the YAML at plan time, avoiding hardcoded IDs in the YAML file itself.
+#
+# Create a file named cf_pipeline_params.tftpl next to this .tf file using
+# ${variable_name} placeholders for any value you want to inject. Example:
+#
+#   configurationSource: job_parameter
+#   cfEnvConfiguration:
+#     stages:
+#       build:
+#         buildTool: mta
+#         buildToolVersion: MBTJ21N24
+#         _additional:
+#           credentialVariables:
+#             - name: NEXUS_PASSWORD
+#               valueSource: ${deploy_cred}
+#       release:
+#         cfDeploy:
+#           strategy: blue-green
+#           apiEndpoint: https://api.cf.us10.hana.ondemand.com
+#           org: my-org
+#           space: production
+#           credential: ${deploy_cred}
+#       compliance:
+#         sonarScan:
+#           mode: SonarCloud
+#           serverUrl: https://sonarcloud.io
+#           organization: my-org
+#           projectKey: my-org_my-project
+#           tokenCredential: ${sonar_cred}
+# =============================================================================
+resource "btpservice_cicd_job" "cf_env_from_template" {
+  name                 = "cf-from-template"
+  description          = "Pipeline parameters rendered from a template file via templatefile()"
+  repository_id        = local.repository_id
+  branch               = "main"
+  pipeline             = "cf-env"
+  pipeline_version     = "3.0"
+  active               = true
+  build_retention_days = 28
+  max_builds_to_keep   = 10
+
+  pipeline_parameters = templatefile("${path.module}/cf_pipeline_params.tftpl", {
+    deploy_cred = local.deploy_cred
+    sonar_cred  = local.sonar_cred
+  })
+}
+
+# =============================================================================
 # Pipeline type: cf-env — pipeline config read from the source repository
 # =============================================================================
 resource "btpservice_cicd_job" "cf_source_repo" {
