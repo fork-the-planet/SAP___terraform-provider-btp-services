@@ -27,6 +27,8 @@ func TestListResourceCicdBuildTrigger(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		t.Parallel()
 
+		// The cassette has one OAuth token interaction shared across both query steps;
+		// the HTTP client caches the token for its lifetime (expires_in=3599s).
 		rec, creds := utils.SetupVCR(t, "../fixtures/list_resource_build_trigger")
 		defer tfutils.StopQuietly(rec)
 
@@ -104,6 +106,27 @@ list "btpservice_cicd_build_trigger" "test" {
 
 		if !resp.Diagnostics.HasError() {
 			t.Error("Expected error for invalid provider data type")
+		}
+	})
+
+	t.Run("error path - list called before configure", func(t *testing.T) {
+		t.Parallel()
+
+		r := cicdjobs.NewBuildTriggerListResource()
+		stream := &list.ListResultsStream{}
+		r.(interface {
+			List(context.Context, list.ListRequest, *list.ListResultsStream)
+		}).List(context.Background(), list.ListRequest{}, stream)
+
+		var diagErr bool
+		stream.Results(func(result list.ListResult) bool {
+			if result.Diagnostics.HasError() {
+				diagErr = true
+			}
+			return true
+		})
+		if !diagErr {
+			t.Error("Expected error when List is called without a configured client")
 		}
 	})
 }
