@@ -164,8 +164,8 @@ func (m jobResourceModel) toAPINotificationConfiguration() *cicdmodels.Notificat
 	return notif
 }
 
-// buildTriggerIdentityModel is the identity of a build trigger resource.
-type buildTriggerIdentityModel struct {
+// triggerIdentityModel is the identity of a trigger resource.
+type triggerIdentityModel struct {
 	Job types.String `tfsdk:"job"`
 	ID  types.String `tfsdk:"id"`
 }
@@ -176,16 +176,16 @@ type timerModel struct {
 	Cron   types.String `tfsdk:"cron"`
 }
 
-// buildTriggerResourceModel is the Terraform state model for the build trigger resource.
-type buildTriggerResourceModel struct {
+// triggerResourceModel is the Terraform state model for the trigger resource.
+type triggerResourceModel struct {
 	ID    types.String `tfsdk:"id"`
 	Job   types.String `tfsdk:"job"`
 	Type  types.String `tfsdk:"type"`
 	Timer *timerModel  `tfsdk:"timer"`
 }
 
-func buildTriggerResourceValueFrom(job string, t cicdmodels.Trigger) buildTriggerResourceModel {
-	m := buildTriggerResourceModel{
+func triggerResourceValueFrom(job string, t cicdmodels.Trigger) triggerResourceModel {
+	m := triggerResourceModel{
 		ID:   types.StringValue(t.ID),
 		Job:  types.StringValue(job),
 		Type: types.StringValue(t.Type),
@@ -199,7 +199,7 @@ func buildTriggerResourceValueFrom(job string, t cicdmodels.Trigger) buildTrigge
 	return m
 }
 
-func (m buildTriggerResourceModel) toCreateRequest() cicdmodels.CreateTriggerRequest {
+func (m triggerResourceModel) toCreateRequest() cicdmodels.CreateTriggerRequest {
 	req := cicdmodels.CreateTriggerRequest{
 		Type: m.Type.ValueString(),
 	}
@@ -212,7 +212,7 @@ func (m buildTriggerResourceModel) toCreateRequest() cicdmodels.CreateTriggerReq
 	return req
 }
 
-func (m buildTriggerResourceModel) toUpdateRequest() cicdmodels.UpdateTriggerRequest {
+func (m triggerResourceModel) toUpdateRequest() cicdmodels.UpdateTriggerRequest {
 	req := cicdmodels.UpdateTriggerRequest{
 		Type: m.Type.ValueString(),
 	}

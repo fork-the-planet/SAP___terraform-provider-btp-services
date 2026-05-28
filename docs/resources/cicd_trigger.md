@@ -1,18 +1,18 @@
 ---
-page_title: "btpservice_cicd_build_trigger Resource - SAP BTP Services"
+page_title: "btpservice_cicd_trigger Resource - SAP BTP Services"
 subcategory: ""
 description: |-
-  Manages a build trigger for a CI/CD job in the SAP BTP CI/CD service. Currently only timer type triggers are supported.
+  Manages a trigger for a CI/CD job in the SAP BTP CI/CD service. Currently only timer type triggers are supported.
 ---
 
-# btpservice_cicd_build_trigger (Resource)
+# btpservice_cicd_trigger (Resource)
 
-Manages a build trigger for a CI/CD job in the SAP BTP CI/CD service. Currently only `timer` type triggers are supported.
+Manages a trigger for a CI/CD job in the SAP BTP CI/CD service. Currently only `timer` type triggers are supported.
 
 ## Example Usage
 
 ```terraform
-resource "btpservice_cicd_build_trigger" "nightly" {
+resource "btpservice_cicd_trigger" "nightly" {
   job  = btpservice_cicd_repository.app.name
   type = "timer"
 
@@ -22,8 +22,8 @@ resource "btpservice_cicd_build_trigger" "nightly" {
   }
 }
 
-# Weekday morning build trigger
-resource "btpservice_cicd_build_trigger" "weekday_morning" {
+# Weekday morning trigger
+resource "btpservice_cicd_trigger" "weekday_morning" {
   job  = "my-pipeline-job"
   type = "timer"
 
@@ -63,19 +63,19 @@ Optional:
 Import is supported using the following syntax:
 
 ```terraform
-# terraform import btpservice_cicd_build_trigger.<resource_name> <job_id>,<trigger_id>
+# terraform import btpservice_cicd_trigger.<resource_name> <job_id>,<trigger_id>
 
-terraform import btpservice_cicd_build_trigger.example my-pipeline-job,afbacb1c-e7f2-4f8d-94e3-8508332fcd2e
+terraform import btpservice_cicd_trigger.example my-pipeline-job,afbacb1c-e7f2-4f8d-94e3-8508332fcd2e
 
 # terraform import using id attribute in import block
 
 import {
-  to = btpservice_cicd_build_trigger.<resource_name>
+  to = btpservice_cicd_trigger.<resource_name>
   id = "<job_id>,<trigger_id>"
 }
 
 import {
-  to = btpservice_cicd_build_trigger.<resource_name>
+  to = btpservice_cicd_trigger.<resource_name>
   identity = {
     job = "<job_id>"
     id  = "<trigger_id>"
