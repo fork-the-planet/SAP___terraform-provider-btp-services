@@ -46,6 +46,18 @@ func (f *jobsFacade) Delete(ctx context.Context, reference string) error {
 	return f.hc.doDelete(ctx, fmt.Sprintf("/v2/jobs/%s", url.PathEscape(reference)))
 }
 
+// List sends GET /v2/jobs and returns all jobs across all repositories.
+func (f *jobsFacade) List(ctx context.Context) ([]cicdmodels.Job, error) {
+	var result cicdmodels.JobListResponse
+	if err := f.hc.doGet(ctx, "/v2/jobs", &result); err != nil {
+		return nil, err
+	}
+	if result.Embedded == nil {
+		return []cicdmodels.Job{}, nil
+	}
+	return result.Embedded.Jobs, nil
+}
+
 // ListByRepository sends GET /v2/repositories/{reference}/jobs and returns all jobs for the repository.
 // reference is the repository name or ID.
 func (f *jobsFacade) ListByRepository(ctx context.Context, repositoryReference string) ([]cicdmodels.Job, error) {

@@ -46,6 +46,10 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 		credentials.NewCredentialUsageDataSource,
 		credentials.NewJobCredentialsDataSource,
 
+		// Job Datasources
+		jobs.NewJobDataSource,
+		jobs.NewJobsDataSource,
+
 		// Repository Datasources
 		repositories.NewRepositoryDataSource,
 		repositories.NewRepositoriesDataSource,
@@ -57,6 +61,9 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 
 func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
+		// Job ListResources
+		jobs.NewJobListResource,
+
 		// Repository ListResources
 		repositories.NewRepositoryListResource,
 	}
