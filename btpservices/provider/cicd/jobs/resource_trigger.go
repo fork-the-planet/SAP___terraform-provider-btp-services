@@ -1,4 +1,4 @@
-// btpservices/provider/cicd/jobs/resource_build_trigger.go
+// btpservices/provider/cicd/jobs/resource_trigger.go
 
 package cicdjobs
 
@@ -22,25 +22,25 @@ import (
 	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
 )
 
-var _ resource.Resource = &buildTriggerResource{}
-var _ resource.ResourceWithConfigure = &buildTriggerResource{}
-var _ resource.ResourceWithImportState = &buildTriggerResource{}
-var _ resource.ResourceWithIdentity = &buildTriggerResource{}
-var _ resource.ResourceWithValidateConfig = &buildTriggerResource{}
+var _ resource.Resource = &triggerResource{}
+var _ resource.ResourceWithConfigure = &triggerResource{}
+var _ resource.ResourceWithImportState = &triggerResource{}
+var _ resource.ResourceWithIdentity = &triggerResource{}
+var _ resource.ResourceWithValidateConfig = &triggerResource{}
 
-func NewBuildTriggerResource() resource.Resource {
-	return &buildTriggerResource{}
+func NewTriggerResource() resource.Resource {
+	return &triggerResource{}
 }
 
-type buildTriggerResource struct {
+type triggerResource struct {
 	cli *cicdclient.CicdClientFacade
 }
 
-func (r *buildTriggerResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = fmt.Sprintf("%s_cicd_build_trigger", req.ProviderTypeName)
+func (r *triggerResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = fmt.Sprintf("%s_cicd_trigger", req.ProviderTypeName)
 }
 
-func (r *buildTriggerResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+func (r *triggerResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
 	resp.IdentitySchema = identityschema.Schema{
 		Attributes: map[string]identityschema.Attribute{
 			"job": identityschema.StringAttribute{
@@ -53,9 +53,9 @@ func (r *buildTriggerResource) IdentitySchema(_ context.Context, _ resource.Iden
 	}
 }
 
-func (r *buildTriggerResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *triggerResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a build trigger for a CI/CD job in the SAP BTP CI/CD service. Currently only `timer` type triggers are supported.",
+		MarkdownDescription: "Manages a trigger for a CI/CD job in the SAP BTP CI/CD service. Currently only `timer` type triggers are supported.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Unique identifier of the trigger (assigned by the API on creation).",
@@ -101,7 +101,7 @@ func (r *buildTriggerResource) Schema(_ context.Context, _ resource.SchemaReques
 	}
 }
 
-func (r *buildTriggerResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *triggerResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -125,8 +125,8 @@ func (r *buildTriggerResource) Configure(_ context.Context, req resource.Configu
 }
 
 // ValidateConfig enforces that the timer block is set when type = "timer".
-func (r *buildTriggerResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
-	var data buildTriggerResourceModel
+func (r *triggerResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data triggerResourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() || data.Type.IsUnknown() {
 		return
@@ -140,8 +140,8 @@ func (r *buildTriggerResource) ValidateConfig(ctx context.Context, req resource.
 	}
 }
 
-func (r *buildTriggerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan buildTriggerResourceModel
+func (r *triggerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan triggerResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -149,20 +149,20 @@ func (r *buildTriggerResource) Create(ctx context.Context, req resource.CreateRe
 
 	result, err := r.cli.Jobs.CreateTrigger(ctx, plan.Job.ValueString(), plan.toCreateRequest())
 	if err != nil {
-		resp.Diagnostics.AddError("Error Creating Build Trigger", err.Error())
+		resp.Diagnostics.AddError("Error Creating Trigger", err.Error())
 		return
 	}
 
-	state := buildTriggerResourceValueFrom(plan.Job.ValueString(), *result)
+	state := triggerResourceValueFrom(plan.Job.ValueString(), *result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, buildTriggerIdentityModel{
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, triggerIdentityModel{
 		Job: plan.Job,
 		ID:  types.StringValue(result.ID),
 	})...)
 }
 
-func (r *buildTriggerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state buildTriggerResourceModel
+func (r *triggerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state triggerResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -174,55 +174,55 @@ func (r *buildTriggerResource) Read(ctx context.Context, req resource.ReadReques
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Error Reading Build Trigger", err.Error())
+		resp.Diagnostics.AddError("Error Reading Trigger", err.Error())
 		return
 	}
 
-	var identity buildTriggerIdentityModel
+	var identity triggerIdentityModel
 	diags := req.Identity.Get(ctx, &identity)
 	if diags.HasError() {
-		identity = buildTriggerIdentityModel{Job: state.Job, ID: state.ID}
+		identity = triggerIdentityModel{Job: state.Job, ID: state.ID}
 	}
 
-	updated := buildTriggerResourceValueFrom(state.Job.ValueString(), *result)
+	updated := triggerResourceValueFrom(state.Job.ValueString(), *result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, identity)...)
 }
 
-func (r *buildTriggerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan buildTriggerResourceModel
+func (r *triggerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan triggerResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var state buildTriggerResourceModel
+	var state triggerResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	if err := r.cli.Jobs.UpdateTrigger(ctx, state.Job.ValueString(), state.ID.ValueString(), plan.toUpdateRequest()); err != nil {
-		resp.Diagnostics.AddError("Error Updating Build Trigger", err.Error())
+		resp.Diagnostics.AddError("Error Updating Trigger", err.Error())
 		return
 	}
 
 	result, err := r.cli.Jobs.GetTrigger(ctx, state.Job.ValueString(), state.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Error Reading Build Trigger After Update", err.Error())
+		resp.Diagnostics.AddError("Error Reading Trigger After Update", err.Error())
 		return
 	}
 
-	updated := buildTriggerResourceValueFrom(state.Job.ValueString(), *result)
+	updated := triggerResourceValueFrom(state.Job.ValueString(), *result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, buildTriggerIdentityModel{
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, triggerIdentityModel{
 		Job: state.Job,
 		ID:  state.ID,
 	})...)
 }
 
-func (r *buildTriggerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state buildTriggerResourceModel
+func (r *triggerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state triggerResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -230,14 +230,14 @@ func (r *buildTriggerResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	if err := r.cli.Jobs.DeleteTrigger(ctx, state.Job.ValueString(), state.ID.ValueString()); err != nil {
 		if !cicdmodels.IsNotFound(err) {
-			resp.Diagnostics.AddError("Error Deleting Build Trigger", err.Error())
+			resp.Diagnostics.AddError("Error Deleting Trigger", err.Error())
 		}
 	}
 }
 
 // ImportState accepts either "job_ref,trigger_id" (string-based import) or an
 // identity-based import (Terraform 1.12+) where req.Identity carries job and id.
-func (r *buildTriggerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *triggerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if req.ID != "" {
 		parts := strings.SplitN(req.ID, ",", 2)
 		if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -249,14 +249,14 @@ func (r *buildTriggerResource) ImportState(ctx context.Context, req resource.Imp
 		}
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("job"), parts[0])...)
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[1])...)
-		resp.Diagnostics.Append(resp.Identity.Set(ctx, buildTriggerIdentityModel{
+		resp.Diagnostics.Append(resp.Identity.Set(ctx, triggerIdentityModel{
 			Job: types.StringValue(parts[0]),
 			ID:  types.StringValue(parts[1]),
 		})...)
 		return
 	}
 	// Identity-based import (Terraform 1.12+): resp.Identity is pre-populated from req.Identity.
-	var identity buildTriggerIdentityModel
+	var identity triggerIdentityModel
 	diags := resp.Identity.Get(ctx, &identity)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -1,4 +1,4 @@
-resource "btpservice_cicd_build_trigger" "nightly" {
+resource "btpservice_cicd_trigger" "nightly" {
   job  = btpservice_cicd_repository.app.name
   type = "timer"
 
@@ -8,8 +8,8 @@ resource "btpservice_cicd_build_trigger" "nightly" {
   }
 }
 
-# Weekday morning build trigger
-resource "btpservice_cicd_build_trigger" "weekday_morning" {
+# Weekday morning trigger
+resource "btpservice_cicd_trigger" "weekday_morning" {
   job  = "my-pipeline-job"
   type = "timer"
 

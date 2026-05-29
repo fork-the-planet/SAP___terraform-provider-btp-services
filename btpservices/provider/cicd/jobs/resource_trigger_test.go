@@ -1,4 +1,4 @@
-// btpservices/provider/cicd/jobs/resource_build_trigger_test.go
+// btpservices/provider/cicd/jobs/resource_trigger_test.go
 
 package cicdjobs_test
 
@@ -18,13 +18,13 @@ import (
 	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
 )
 
-func TestResourceCicdBuildTrigger(t *testing.T) {
+func TestResourceCicdTrigger(t *testing.T) {
 	t.Parallel()
 
 	t.Run("happy path - create, update, and import", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := utils.SetupVCR(t, "../fixtures/resource_build_trigger")
+		rec, creds := utils.SetupVCR(t, "../fixtures/resource_trigger")
 		defer tfutils.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -33,7 +33,7 @@ func TestResourceCicdBuildTrigger(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Config: utils.HCLProviderBlock(creds) + `
-resource "btpservice_cicd_build_trigger" "test" {
+resource "btpservice_cicd_trigger" "test" {
   job  = "tf-test-job"
   type = "timer"
   timer = {
@@ -43,17 +43,17 @@ resource "btpservice_cicd_build_trigger" "test" {
 }
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttrSet("btpservice_cicd_build_trigger.test", "id"),
-						resource.TestCheckResourceAttr("btpservice_cicd_build_trigger.test", "job", "tf-test-job"),
-						resource.TestCheckResourceAttr("btpservice_cicd_build_trigger.test", "type", "timer"),
-						resource.TestCheckResourceAttr("btpservice_cicd_build_trigger.test", "timer.branch", "main"),
-						resource.TestCheckResourceAttr("btpservice_cicd_build_trigger.test", "timer.cron", "0 9 * * 1-5"),
+						resource.TestCheckResourceAttrSet("btpservice_cicd_trigger.test", "id"),
+						resource.TestCheckResourceAttr("btpservice_cicd_trigger.test", "job", "tf-test-job"),
+						resource.TestCheckResourceAttr("btpservice_cicd_trigger.test", "type", "timer"),
+						resource.TestCheckResourceAttr("btpservice_cicd_trigger.test", "timer.branch", "main"),
+						resource.TestCheckResourceAttr("btpservice_cicd_trigger.test", "timer.cron", "0 9 * * 1-5"),
 					),
 				},
 				{
 					// Step 2: Update cron schedule
 					Config: utils.HCLProviderBlock(creds) + `
-resource "btpservice_cicd_build_trigger" "test" {
+resource "btpservice_cicd_trigger" "test" {
   job  = "tf-test-job"
   type = "timer"
   timer = {
@@ -63,16 +63,16 @@ resource "btpservice_cicd_build_trigger" "test" {
 }
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("btpservice_cicd_build_trigger.test", "timer.cron", "0 10 * * 1-5"),
+						resource.TestCheckResourceAttr("btpservice_cicd_trigger.test", "timer.cron", "0 10 * * 1-5"),
 					),
 				},
 				{
 					// Step 3: Import via composite "job/trigger_id" key derived from state
-					ResourceName:      "btpservice_cicd_build_trigger.test",
+					ResourceName:      "btpservice_cicd_trigger.test",
 					ImportState:       true,
 					ImportStateVerify: true,
 					ImportStateIdFunc: func(s *terraform.State) (string, error) {
-						rs := s.RootModule().Resources["btpservice_cicd_build_trigger.test"]
+						rs := s.RootModule().Resources["btpservice_cicd_trigger.test"]
 						if rs == nil {
 							return "", fmt.Errorf("resource not found in state")
 						}
@@ -91,7 +91,7 @@ resource "btpservice_cicd_build_trigger" "test" {
 			Steps: []resource.TestStep{
 				{
 					Config: utils.HCLProviderBlock(utils.Redacted) + `
-resource "btpservice_cicd_build_trigger" "test" {
+resource "btpservice_cicd_trigger" "test" {
   type = "timer"
   timer = {
     cron = "0 9 * * 1-5"
@@ -112,7 +112,7 @@ resource "btpservice_cicd_build_trigger" "test" {
 			Steps: []resource.TestStep{
 				{
 					Config: utils.HCLProviderBlock(utils.Redacted) + `
-resource "btpservice_cicd_build_trigger" "test" {
+resource "btpservice_cicd_trigger" "test" {
   job = "tf-test-job"
 }
 `,
@@ -130,7 +130,7 @@ resource "btpservice_cicd_build_trigger" "test" {
 			Steps: []resource.TestStep{
 				{
 					Config: utils.HCLProviderBlock(utils.Redacted) + `
-resource "btpservice_cicd_build_trigger" "test" {
+resource "btpservice_cicd_trigger" "test" {
   job  = "tf-test-job"
   type = "TIMER"
 }
@@ -149,7 +149,7 @@ resource "btpservice_cicd_build_trigger" "test" {
 			Steps: []resource.TestStep{
 				{
 					Config: utils.HCLProviderBlock(utils.Redacted) + `
-resource "btpservice_cicd_build_trigger" "test" {
+resource "btpservice_cicd_trigger" "test" {
   job  = "tf-test-job"
   type = "timer"
 }
@@ -162,7 +162,7 @@ resource "btpservice_cicd_build_trigger" "test" {
 
 	t.Run("error - nil cicd client", func(t *testing.T) {
 		t.Parallel()
-		r := cicdjobs.NewBuildTriggerResource().(fwresource.ResourceWithConfigure)
+		r := cicdjobs.NewTriggerResource().(fwresource.ResourceWithConfigure)
 		resp := &fwresource.ConfigureResponse{}
 		r.Configure(context.Background(), fwresource.ConfigureRequest{ProviderData: &shared.ProviderClients{Cicd: nil}}, resp)
 		if !resp.Diagnostics.HasError() {
