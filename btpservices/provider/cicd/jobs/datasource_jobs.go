@@ -154,7 +154,7 @@ func (d *jobsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, res
 	state := jobsDSModel{
 		ID: types.StringValue("jobs"),
 	}
-	values, diags := jobsDSItemsFrom(list)
+	values, diags := jobsDSItemsFrom(ctx, list)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

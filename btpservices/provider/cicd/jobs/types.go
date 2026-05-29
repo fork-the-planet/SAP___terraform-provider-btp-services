@@ -331,7 +331,7 @@ var jobsDSItemAttrTypes = map[string]attr.Type{
 
 var jobsDSItemType = types.ObjectType{AttrTypes: jobsDSItemAttrTypes}
 
-func jobsDSItemsFrom(list []cicdmodels.Job) (types.List, diag.Diagnostics) {
+func jobsDSItemsFrom(ctx context.Context, list []cicdmodels.Job) (types.List, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	items := make([]attr.Value, 0, len(list))
 
@@ -368,7 +368,7 @@ func jobsDSItemsFrom(list []cicdmodels.Job) (types.List, diag.Diagnostics) {
 			item.NotificationConfiguration = &notificationConfigurationModel{ANS: nil}
 		}
 
-		obj, d := types.ObjectValueFrom(context.Background(), jobsDSItemAttrTypes, item)
+		obj, d := types.ObjectValueFrom(ctx, jobsDSItemAttrTypes, item)
 		diags.Append(d...)
 		if diags.HasError() {
 			return types.ListNull(jobsDSItemType), diags

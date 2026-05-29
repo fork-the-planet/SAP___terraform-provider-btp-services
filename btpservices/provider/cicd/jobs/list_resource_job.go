@@ -106,11 +106,9 @@ func (r *jobListResource) List(ctx context.Context, req list.ListRequest, stream
 		return
 	}
 
-	pipelineFilter := config.Pipeline.ValueString()
-
 	stream.Results = func(push func(list.ListResult) bool) {
 		for _, job := range jobs {
-			if pipelineFilter != "" && job.Pipeline != pipelineFilter {
+			if !config.Pipeline.IsNull() && job.Pipeline != config.Pipeline.ValueString() {
 				continue
 			}
 			if !config.RepositoryID.IsNull() && job.RepositoryID != config.RepositoryID.ValueString() {
