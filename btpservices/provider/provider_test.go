@@ -137,8 +137,13 @@ var expectedResourceTypes = []string{
 var expectedDataSourceTypes = []string{
 	"btpservice_cicd_credential",
 	"btpservice_cicd_credentials",
+	"btpservice_cicd_credential_usage",
+	"btpservice_cicd_job_credentials",
 	"btpservice_cicd_repositories",
 	"btpservice_cicd_repository",
+	"btpservice_cicd_repository_event_receiver",
+	"btpservice_cicd_repository_jobs",
+	"btpservice_cicd_repository_webhook_config",
 	"btpservice_cicd_trigger",
 	"btpservice_cicd_triggers",
 }

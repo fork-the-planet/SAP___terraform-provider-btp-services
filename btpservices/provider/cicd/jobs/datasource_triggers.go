@@ -57,7 +57,6 @@ func (d *triggersDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 						"timer": schema.SingleNestedAttribute{
 							MarkdownDescription: "Timer schedule configuration. Present when `type` is `timer`.",
 							Computed:            true,
-							Optional:            true,
 							Attributes: map[string]schema.Attribute{
 								"branch": schema.StringAttribute{
 									MarkdownDescription: "Branch to build on the timer schedule.",

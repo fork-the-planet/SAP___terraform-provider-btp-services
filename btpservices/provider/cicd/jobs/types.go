@@ -239,6 +239,14 @@ type triggersDSModel struct {
 	Values []triggerDSItem `tfsdk:"values"`
 }
 
+// triggerDSModel is the Terraform state model for the btpservice_cicd_trigger data source.
+type triggerDSModel struct {
+	ID    types.String `tfsdk:"id"`
+	Job   types.String `tfsdk:"job"`
+	Type  types.String `tfsdk:"type"`
+	Timer *timerModel  `tfsdk:"timer"`
+}
+
 func triggerDSItemFrom(t cicdmodels.Trigger) triggerDSItem {
 	item := triggerDSItem{
 		ID:   types.StringValue(t.ID),
@@ -251,4 +259,19 @@ func triggerDSItemFrom(t cicdmodels.Trigger) triggerDSItem {
 		}
 	}
 	return item
+}
+
+func triggerDSValueFrom(job string, t cicdmodels.Trigger) triggerDSModel {
+	m := triggerDSModel{
+		ID:   types.StringValue(t.ID),
+		Job:  types.StringValue(job),
+		Type: types.StringValue(t.Type),
+	}
+	if t.Timer != nil {
+		m.Timer = &timerModel{
+			Branch: types.StringValue(t.Timer.Branch),
+			Cron:   types.StringValue(t.Timer.Cron),
+		}
+	}
+	return m
 }

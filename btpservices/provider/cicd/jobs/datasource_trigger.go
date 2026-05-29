@@ -86,7 +86,7 @@ func (d *triggerDataSource) Configure(_ context.Context, req datasource.Configur
 }
 
 func (d *triggerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var config triggerResourceModel
+	var config triggerDSModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -105,5 +105,5 @@ func (d *triggerDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, triggerResourceValueFrom(config.Job.ValueString(), *result))...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, triggerDSValueFrom(config.Job.ValueString(), *result))...)
 }
