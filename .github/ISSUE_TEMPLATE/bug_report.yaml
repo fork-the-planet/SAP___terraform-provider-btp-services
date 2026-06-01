@@ -14,14 +14,14 @@ body:
     attributes:
       label: What version of the Terraform provider are you using?
       description: What version of the Terraform provider for SAP BTP Services are you using?
-      placeholder: 1.21.3
+      placeholder: 0.1.0-beta1
     validations:
       required: true
   - type: input
     attributes:
       label: What version of the Terraform CLI are you using?
       description: What version of the Terraform CLI are you using?
-      placeholder: 1.14.0
+      placeholder: 1.15.0
     validations:
       required: true
   - type: dropdown
@@ -33,6 +33,14 @@ body:
         - bug report
         - documentation issue
         - regression (a behavior that used to work and stopped in a new version)
+  - type: dropdown
+    id: service
+    attributes:
+      label: What service is the issue related to?
+      description: What service is the issue related to?
+      options:
+        - CI/CD Service
+      default: 0
     validations:
       required: true
   - type: textarea
@@ -76,8 +84,8 @@ body:
 
         This is especially important if you are facing authorization issues like errors with status code 403.
       placeholder: |
-        - Global Account Viewer
-        - Subaccount Administrator
+        - CICD Service Administrator
+        - CICD Service Developer
     validations:
       required: false
   - type: textarea
