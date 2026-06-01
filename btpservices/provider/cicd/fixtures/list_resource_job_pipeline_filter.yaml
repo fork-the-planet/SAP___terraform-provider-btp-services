@@ -1,0 +1,113 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-token-host
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form:
+            grant_type:
+                - client_credentials
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-token-host/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted-access-token","token_type":"bearer","expires_in":3599,"scope":"redacted-scope","jti":"redacted-jti"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 29 May 2026 05:00:01 GMT
+            Pragma:
+                - no-cache
+            Server:
+                - nginx
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+            X-Xss-Protection:
+                - 1; mode=block
+        status: 200 OK
+        code: 200
+        duration: 1.228979834s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"_embedded":{"jobs":[{"apiVersion":"v2","id":"edceb720-74c0-4637-a195-00698d8050b9","name":"tf-ds-test-job-credentials","description":"this is for testing the job credential data source ","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"cfEnvConfiguration":null,"configurationSource":"source_repository"},"notificationConfiguration":{"ans":{"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"testing the job cred","active":true}},"_links":{"self":{"href":"redacted"}}},{"apiVersion":"v2","id":"ca9101f6-49b7-4e91-b632-e4c222fd9e4d","name":"tf-test-job","description":"","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"cfEnvConfiguration":null,"configurationSource":"source_repository"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}]},"_links":{"self":{"href":"redacted"}},"page":{"size":200,"totalElements":2,"totalPages":1,"number":0}}'
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Fri, 29 May 2026 05:00:02 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 873.405792ms

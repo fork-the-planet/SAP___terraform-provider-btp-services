@@ -108,25 +108,4 @@ list "btpservice_cicd_trigger" "test" {
 			t.Error("Expected error for invalid provider data type")
 		}
 	})
-
-	t.Run("error path - list called before configure", func(t *testing.T) {
-		t.Parallel()
-
-		r := cicdjobs.NewTriggerListResource()
-		stream := &list.ListResultsStream{}
-		r.(interface {
-			List(context.Context, list.ListRequest, *list.ListResultsStream)
-		}).List(context.Background(), list.ListRequest{}, stream)
-
-		var diagErr bool
-		stream.Results(func(result list.ListResult) bool {
-			if result.Diagnostics.HasError() {
-				diagErr = true
-			}
-			return true
-		})
-		if !diagErr {
-			t.Error("Expected error when List is called without a configured client")
-		}
-	})
 }

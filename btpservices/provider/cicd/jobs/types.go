@@ -3,13 +3,21 @@
 package cicdjobs
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"gopkg.in/yaml.v3"
 
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
 )
+
+// jobIdentityModel is the identity of a job resource.
+type jobIdentityModel struct {
+	ID types.String `tfsdk:"id"`
+}
 
 // jobResourceModel is the Terraform state model for the job resource.
 type jobResourceModel struct {
@@ -164,6 +172,62 @@ func (m jobResourceModel) toAPINotificationConfiguration() *cicdmodels.Notificat
 	return notif
 }
 
+// ---------------------------------------------------------------------------
+// Data source model
+// ---------------------------------------------------------------------------
+
+// jobDSModel is the Terraform state model for the single-job data source.
+type jobDSModel struct {
+	ID                        types.String                    `tfsdk:"id"`
+	Name                      types.String                    `tfsdk:"name"`
+	Description               types.String                    `tfsdk:"description"`
+	Active                    types.Bool                      `tfsdk:"active"`
+	Pipeline                  types.String                    `tfsdk:"pipeline"`
+	PipelineVersion           types.String                    `tfsdk:"pipeline_version"`
+	PipelineParameters        types.String                    `tfsdk:"pipeline_parameters"`
+	BuildRetentionDays        types.Int64                     `tfsdk:"build_retention_days"`
+	MaxBuildsToKeep           types.Int64                     `tfsdk:"max_builds_to_keep"`
+	Branch                    types.String                    `tfsdk:"branch"`
+	RepositoryID              types.String                    `tfsdk:"repository_id"`
+	NotificationConfiguration *notificationConfigurationModel `tfsdk:"notification_configuration"`
+}
+
+// jobDSValueFrom maps an API Job response to the data source state model.
+// pipeline_parameters is serialised to canonical YAML.
+func jobDSValueFrom(v cicdmodels.Job) (jobDSModel, error) {
+	yamlStr, err := mapToYAML(v.PipelineParameters)
+	if err != nil {
+		return jobDSModel{}, err
+	}
+
+	var notifConfig *notificationConfigurationModel
+	if v.NotificationConfiguration != nil {
+		notifConfig = &notificationConfigurationModel{}
+		if v.NotificationConfiguration.ANS != nil {
+			notifConfig.ANS = &ansConfigurationModel{
+				Active:       types.BoolValue(v.NotificationConfiguration.ANS.Active),
+				CredentialID: types.StringValue(v.NotificationConfiguration.ANS.CredentialID),
+				CustomTag:    types.StringValue(v.NotificationConfiguration.ANS.CustomTag),
+			}
+		}
+	}
+
+	return jobDSModel{
+		ID:                        types.StringValue(v.ID),
+		Name:                      types.StringValue(v.Name),
+		Description:               types.StringValue(v.Description),
+		Active:                    types.BoolValue(v.Active),
+		Pipeline:                  types.StringValue(v.Pipeline),
+		PipelineVersion:           types.StringValue(v.PipelineVersion),
+		PipelineParameters:        types.StringValue(yamlStr),
+		BuildRetentionDays:        types.Int64Value(int64(v.BuildRetentionDays)),
+		MaxBuildsToKeep:           types.Int64Value(int64(v.MaxBuildsToKeep)),
+		Branch:                    types.StringValue(v.Branch),
+		RepositoryID:              types.StringValue(v.RepositoryID),
+		NotificationConfiguration: notifConfig,
+	}, nil
+}
+
 // triggerIdentityModel is the identity of a trigger resource.
 type triggerIdentityModel struct {
 	Job types.String `tfsdk:"job"`
@@ -210,6 +274,111 @@ func (m triggerResourceModel) toCreateRequest() cicdmodels.CreateTriggerRequest 
 		}
 	}
 	return req
+}
+
+// ---------------------------------------------------------------------------
+// Plural jobs data source models
+// ---------------------------------------------------------------------------
+
+// jobsDSModel is the Terraform state model for the jobs (plural) data source.
+type jobsDSModel struct {
+	ID     types.String `tfsdk:"id"`
+	Values types.List   `tfsdk:"values"`
+}
+
+// jobsDSItemModel is one item in the values list.
+type jobsDSItemModel struct {
+	ID                        types.String                    `tfsdk:"id"`
+	Name                      types.String                    `tfsdk:"name"`
+	Description               types.String                    `tfsdk:"description"`
+	Active                    types.Bool                      `tfsdk:"active"`
+	Pipeline                  types.String                    `tfsdk:"pipeline"`
+	PipelineVersion           types.String                    `tfsdk:"pipeline_version"`
+	PipelineParameters        types.String                    `tfsdk:"pipeline_parameters"`
+	BuildRetentionDays        types.Int64                     `tfsdk:"build_retention_days"`
+	MaxBuildsToKeep           types.Int64                     `tfsdk:"max_builds_to_keep"`
+	Branch                    types.String                    `tfsdk:"branch"`
+	RepositoryID              types.String                    `tfsdk:"repository_id"`
+	NotificationConfiguration *notificationConfigurationModel `tfsdk:"notification_configuration"`
+}
+
+var jobsDSANSAttrTypes = map[string]attr.Type{
+	"active":        types.BoolType,
+	"credential_id": types.StringType,
+	"custom_tag":    types.StringType,
+}
+
+var jobsDSNotificationAttrTypes = map[string]attr.Type{
+	"ans": types.ObjectType{AttrTypes: jobsDSANSAttrTypes},
+}
+
+var jobsDSItemAttrTypes = map[string]attr.Type{
+	"id":                   types.StringType,
+	"name":                 types.StringType,
+	"description":          types.StringType,
+	"active":               types.BoolType,
+	"pipeline":             types.StringType,
+	"pipeline_version":     types.StringType,
+	"pipeline_parameters":  types.StringType,
+	"build_retention_days": types.Int64Type,
+	"max_builds_to_keep":   types.Int64Type,
+	"branch":               types.StringType,
+	"repository_id":        types.StringType,
+	"notification_configuration": types.ObjectType{
+		AttrTypes: jobsDSNotificationAttrTypes,
+	},
+}
+
+var jobsDSItemType = types.ObjectType{AttrTypes: jobsDSItemAttrTypes}
+
+func jobsDSItemsFrom(ctx context.Context, list []cicdmodels.Job) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	items := make([]attr.Value, 0, len(list))
+
+	for _, j := range list {
+		yamlStr, err := mapToYAML(j.PipelineParameters)
+		if err != nil {
+			diags.AddError("Error Serializing Pipeline Parameters", err.Error())
+			return types.ListNull(jobsDSItemType), diags
+		}
+
+		item := jobsDSItemModel{
+			ID:                 types.StringValue(j.ID),
+			Name:               types.StringValue(j.Name),
+			Description:        types.StringValue(j.Description),
+			Active:             types.BoolValue(j.Active),
+			Pipeline:           types.StringValue(j.Pipeline),
+			PipelineVersion:    types.StringValue(j.PipelineVersion),
+			PipelineParameters: types.StringValue(yamlStr),
+			BuildRetentionDays: types.Int64Value(int64(j.BuildRetentionDays)),
+			MaxBuildsToKeep:    types.Int64Value(int64(j.MaxBuildsToKeep)),
+			Branch:             types.StringValue(j.Branch),
+			RepositoryID:       types.StringValue(j.RepositoryID),
+		}
+
+		if j.NotificationConfiguration != nil && j.NotificationConfiguration.ANS != nil {
+			item.NotificationConfiguration = &notificationConfigurationModel{
+				ANS: &ansConfigurationModel{
+					Active:       types.BoolValue(j.NotificationConfiguration.ANS.Active),
+					CredentialID: types.StringValue(j.NotificationConfiguration.ANS.CredentialID),
+					CustomTag:    types.StringValue(j.NotificationConfiguration.ANS.CustomTag),
+				},
+			}
+		} else {
+			item.NotificationConfiguration = &notificationConfigurationModel{ANS: nil}
+		}
+
+		obj, d := types.ObjectValueFrom(ctx, jobsDSItemAttrTypes, item)
+		diags.Append(d...)
+		if diags.HasError() {
+			return types.ListNull(jobsDSItemType), diags
+		}
+		items = append(items, obj)
+	}
+
+	result, d := types.ListValue(jobsDSItemType, items)
+	diags.Append(d...)
+	return result, diags
 }
 
 func (m triggerResourceModel) toUpdateRequest() cicdmodels.UpdateTriggerRequest {

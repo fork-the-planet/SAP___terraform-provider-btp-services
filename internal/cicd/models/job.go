@@ -31,7 +31,7 @@ type AnsConfiguration struct {
 	CustomTag    string `json:"customTag,omitempty"`
 }
 
-// JobListResponse is the envelope returned by GET /v2/repositories/{reference}/jobs.
+// JobListResponse is the envelope returned by GET /v2/jobs and GET /v2/repositories/{reference}/jobs.
 type JobListResponse struct {
 	Embedded *JobListEmbedded `json:"_embedded,omitempty"`
 }
