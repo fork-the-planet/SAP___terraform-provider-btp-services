@@ -34,10 +34,10 @@
 	"remoteUser": "vscode",
 	// This devcontainer expects a file named .devcontainer/devcontainer.env to exist.
 	// you should place the following environment variables in that file:
-	// - SAPBTP_CICD_ENDPOINT
-	// - SAPBTP_CICD_TOKEN_URL
-	// - SAPBTP_CICD_CLIENT_ID
-	// - SAPBTP_CICD_CLIENT_SECRET
+	// - BTP_CICD_ENDPOINT
+	// - BTP_CICD_TOKEN_URL
+	// - BTP_CICD_CLIENT_ID
+	// - BTP_CICD_CLIENT_SECRET
 	"runArgs": [
 		"--env-file",
 		".devcontainer/devcontainer.env"
