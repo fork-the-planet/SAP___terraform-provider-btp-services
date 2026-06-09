@@ -1,6 +1,6 @@
 module github.com/SAP/terraform-provider-btp-services
 
-go 1.25.8
+go 1.26
 
 require (
 	github.com/hashicorp/terraform-plugin-framework v1.19.0
@@ -9,6 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.15.0
 	github.com/stretchr/testify v1.11.1
 	gopkg.in/dnaeon/go-vcr.v3 v3.2.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -64,5 +65,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
