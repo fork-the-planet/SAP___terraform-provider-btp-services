@@ -1,0 +1,97 @@
+// btpservices/provider/cicd/settings/list_resource_allowed_spaces_test.go
+
+package cicdsettings_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	res "github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
+
+	cicdsettings "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/settings"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
+)
+
+func TestListResourceCicdAllowedSpaces(t *testing.T) {
+	t.Parallel()
+
+	t.Run("happy path", func(t *testing.T) {
+		t.Parallel()
+
+		rec, creds := utils.SetupVCR(t, "../fixtures/list_resource_allowed_spaces")
+		defer tfutils.StopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+				tfversion.SkipBelow(tfversion.Version1_14_0),
+			},
+			Steps: []resource.TestStep{
+				{
+					Query: true,
+					Config: utils.HCLProviderBlock(creds) + `
+list "btpservice_cicd_allowed_spaces" "test" {
+  provider = "btpservice"
+}
+`,
+					QueryResultChecks: []querycheck.QueryResultCheck{
+						querycheck.ExpectLengthAtLeast("btpservice_cicd_allowed_spaces.test", 1),
+					},
+				},
+				{
+					Query: true,
+					Config: utils.HCLProviderBlock(creds) + `
+list "btpservice_cicd_allowed_spaces" "test" {
+  provider         = "btpservice"
+  include_resource = true
+}
+`,
+					QueryResultChecks: []querycheck.QueryResultCheck{
+						querycheck.ExpectLengthAtLeast("btpservice_cicd_allowed_spaces.test", 1),
+						querycheck.ExpectResourceKnownValues(
+							"btpservice_cicd_allowed_spaces.test",
+							queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+								"id": knownvalue.StringExact("allowed_spaces"),
+							}),
+							[]querycheck.KnownValueCheck{
+								{
+									Path:       tfjsonpath.New("allowed_spaces").AtSliceIndex(0).AtMapKey("space_guid"),
+									KnownValue: knownvalue.NotNull(),
+								},
+								{
+									Path:       tfjsonpath.New("allowed_spaces").AtSliceIndex(0).AtMapKey("comment"),
+									KnownValue: knownvalue.NotNull(),
+								},
+							},
+						),
+					},
+				},
+			},
+		})
+	})
+
+	t.Run("error path - configure", func(t *testing.T) {
+		t.Parallel()
+
+		r := cicdsettings.NewAllowedSpacesListResource().(list.ListResourceWithConfigure)
+		resp := &res.ConfigureResponse{}
+		req := res.ConfigureRequest{
+			ProviderData: struct{}{},
+		}
+
+		r.Configure(context.Background(), req, resp)
+
+		if !resp.Diagnostics.HasError() {
+			t.Error("Expected error for invalid provider data type")
+		}
+	})
+}

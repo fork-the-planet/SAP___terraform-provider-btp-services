@@ -1,0 +1,223 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-token-host
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form:
+            grant_type:
+                - client_credentials
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-token-host/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted-access-token","token_type":"bearer","expires_in":3599,"scope":"redacted-scope","jti":"redacted-jti"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 04 Jun 2026 11:30:06 GMT
+            Pragma:
+                - no-cache
+            Server:
+                - nginx
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+            X-Xss-Protection:
+                - 1; mode=block
+        status: 200 OK
+        code: 200
+        duration: 884.449417ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 100
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"allowedSpaces":[{"spaceGuid":"d794d687-3053-4cba-a942-88e6b13ef035","comment":"Team Beta space"}]}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/settings/allowedSpaces
+        method: PUT
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Thu, 04 Jun 2026 11:30:07 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 879.200458ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/settings/allowedSpaces
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"allowedSpaces":[{"spaceGuid":"d794d687-3053-4cba-a942-88e6b13ef035","comment":"Team Beta space"},{"spaceGuid":"a2bcf2b8-6eda-5b8a-0b7c-8512bb82060f","comment":"Team Alpha space"},{"spaceGuid":"f9a880bc-20c3-4f71-a51f-882ccdd369c6","comment":"space id for integration-test-cicd-service"}],"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Thu, 04 Jun 2026 11:30:07 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 283.808875ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 20
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"allowedSpaces":[]}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/settings/allowedSpaces
+        method: PUT
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Thu, 04 Jun 2026 11:30:08 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 310.973542ms
