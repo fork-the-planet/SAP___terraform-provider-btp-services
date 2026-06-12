@@ -189,10 +189,10 @@ func resolveString(v types.String, envKey string) string {
 //
 //	Terraform/<tfVersion> terraform-provider-btp-services/<providerVersion> [<custom>]
 //
-// The optional custom suffix is read from BTP_SERVICES_APPEND_USER_AGENT.
+// The optional custom suffix is read from BTP_SERVICE_USER_AGENT_SUFFIX.
 func buildUserAgent(tfVersion string) string {
 	base := fmt.Sprintf("Terraform/%s terraform-provider-btp-services/%s", tfVersion, version.ProviderVersion)
-	if custom := strings.TrimSpace(os.Getenv("BTP_SERVICES_APPEND_USER_AGENT")); custom != "" {
+	if custom := strings.TrimSpace(os.Getenv("BTP_SERVICE_USER_AGENT_SUFFIX")); custom != "" {
 		return base + " " + custom
 	}
 	return base
