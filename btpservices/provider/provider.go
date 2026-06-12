@@ -185,15 +185,15 @@ func resolveString(v types.String, envKey string) string {
 	return os.Getenv(envKey)
 }
 
-// buildUserAgent constructs the User-Agent header value following the BTP provider convention:
+// buildUserAgent constructs the User-Agent header value:
 //
-//	Terraform/<tfVersion> terraform-provider-btp-services/<providerVersion> [custom-user-agent/<val>]
+//	Terraform/<tfVersion> terraform-provider-btp-services/<providerVersion> [<custom>]
 //
-// The optional custom suffix is read from BTP_CICD_APPEND_USER_AGENT.
+// The optional custom suffix is read from BTP_SERVICES_APPEND_USER_AGENT.
 func buildUserAgent(tfVersion string) string {
 	base := fmt.Sprintf("Terraform/%s terraform-provider-btp-services/%s", tfVersion, version.ProviderVersion)
-	if custom := strings.TrimSpace(os.Getenv("BTP_CICD_APPEND_USER_AGENT")); custom != "" {
-		return base + " custom-user-agent/" + custom
+	if custom := strings.TrimSpace(os.Getenv("BTP_SERVICES_APPEND_USER_AGENT")); custom != "" {
+		return base + " " + custom
 	}
 	return base
 }
