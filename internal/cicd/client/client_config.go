@@ -23,6 +23,11 @@ type CicdClientConfig struct {
 
 	// Timeout is the HTTP client timeout per request. Defaults to 60s when zero.
 	Timeout time.Duration
+
+	// UserAgent is sent as the User-Agent header on every request.
+	// Populated by the provider's Configure() using the Terraform version and
+	// provider version so the CI/CD service can identify the caller.
+	UserAgent string
 }
 
 // DefaultTimeout is used when CicdClientConfig.Timeout is not set.

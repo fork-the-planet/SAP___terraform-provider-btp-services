@@ -4,7 +4,9 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/action"
@@ -18,6 +20,7 @@ import (
 	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd"
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	"github.com/SAP/terraform-provider-btp-services/internal/shared"
+	"github.com/SAP/terraform-provider-btp-services/internal/version"
 )
 
 var _ provider.Provider = &btpServicesProvider{}
@@ -111,6 +114,7 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 			TokenURL:     resolveString(data.Cicd.TokenURL, "BTP_CICD_TOKEN_URL"),
 			ClientID:     resolveString(data.Cicd.ClientID, "BTP_CICD_CLIENT_ID"),
 			ClientSecret: resolveString(data.Cicd.ClientSecret, "BTP_CICD_CLIENT_SECRET"),
+			UserAgent:    buildUserAgent(req.TerraformVersion),
 		}
 		if !data.Cicd.Timeout.IsNull() && !data.Cicd.Timeout.IsUnknown() {
 			cfg.Timeout = time.Duration(data.Cicd.Timeout.ValueInt64()) * time.Second
@@ -179,4 +183,17 @@ func resolveString(v types.String, envKey string) string {
 		return v.ValueString()
 	}
 	return os.Getenv(envKey)
+}
+
+// buildUserAgent constructs the User-Agent header value:
+//
+//	Terraform/<tfVersion> terraform-provider-btp-services/<providerVersion> [<custom>]
+//
+// The optional custom suffix is read from BTP_SERVICE_USER_AGENT_SUFFIX.
+func buildUserAgent(tfVersion string) string {
+	base := fmt.Sprintf("Terraform/%s terraform-provider-btp-services/%s", tfVersion, version.ProviderVersion)
+	if custom := strings.TrimSpace(os.Getenv("BTP_SERVICE_USER_AGENT_SUFFIX")); custom != "" {
+		return base + " " + custom
+	}
+	return base
 }

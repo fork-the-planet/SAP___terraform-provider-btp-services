@@ -26,6 +26,7 @@ type cicdHTTPClient struct {
 	tokenURL     string
 	clientID     string
 	clientSecret string
+	userAgent    string
 	token        string
 	tokenExpiry  time.Time
 }
@@ -48,6 +49,7 @@ func newCicdHTTPClient(cfg CicdClientConfig) *cicdHTTPClient {
 		tokenURL:     cfg.TokenURL,
 		clientID:     cfg.ClientID,
 		clientSecret: cfg.ClientSecret,
+		userAgent:    cfg.UserAgent,
 	}
 }
 
@@ -114,6 +116,7 @@ func (c *cicdHTTPClient) doGet(ctx context.Context, path string, out any) error 
 		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("User-Agent", c.userAgent)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -137,6 +140,7 @@ func (c *cicdHTTPClient) doGetWithETag(ctx context.Context, path string, out any
 		return "", err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("User-Agent", c.userAgent)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -178,6 +182,7 @@ func (c *cicdHTTPClient) doPatch(ctx context.Context, path string, body any) err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/merge-patch+json")
+	req.Header.Set("User-Agent", c.userAgent)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -197,6 +202,7 @@ func (c *cicdHTTPClient) doDelete(ctx context.Context, path string) error {
 		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("User-Agent", c.userAgent)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -223,6 +229,7 @@ func (c *cicdHTTPClient) doWithBody(ctx context.Context, method, path string, bo
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", c.userAgent)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
