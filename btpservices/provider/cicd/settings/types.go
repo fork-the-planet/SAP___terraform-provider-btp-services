@@ -16,6 +16,11 @@ type allowedSpaceEntry struct {
 	Comment   types.String `tfsdk:"comment"`
 }
 
+type allowedSpacesDSModel struct {
+	ID     types.String        `tfsdk:"id"`
+	Values []allowedSpaceEntry `tfsdk:"values"`
+}
+
 func allowedSpacesValueFrom(v cicdmodels.AllowedSpacesResponse) allowedSpacesModel {
 	entries := make([]allowedSpaceEntry, 0, len(v.AllowedSpaces))
 	for _, s := range v.AllowedSpaces {

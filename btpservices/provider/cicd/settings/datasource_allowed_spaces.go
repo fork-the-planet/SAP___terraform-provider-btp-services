@@ -99,8 +99,3 @@ func (d *allowedSpacesDataSource) Read(ctx context.Context, _ datasource.ReadReq
 		Values: entries,
 	})...)
 }
-
-type allowedSpacesDSModel struct {
-	ID     types.String        `tfsdk:"id"`
-	Values []allowedSpaceEntry `tfsdk:"values"`
-}
