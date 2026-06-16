@@ -82,8 +82,6 @@ func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResou
 
 		// Job ListResources
 		jobs.NewTriggerListResource,
-
-		// Settings ListResources
 	}
 }
 
