@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -18,7 +17,6 @@ import (
 
 var _ resource.Resource = &allowedSpacesResource{}
 var _ resource.ResourceWithConfigure = &allowedSpacesResource{}
-var _ resource.ResourceWithIdentity = &allowedSpacesResource{}
 
 func NewAllowedSpacesResource() resource.Resource {
 	return &allowedSpacesResource{}
@@ -26,16 +24,6 @@ func NewAllowedSpacesResource() resource.Resource {
 
 type allowedSpacesResource struct {
 	cli *cicdclient.CicdClientFacade
-}
-
-func (r *allowedSpacesResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
-	resp.IdentitySchema = identityschema.Schema{
-		Attributes: map[string]identityschema.Attribute{
-			"id": identityschema.StringAttribute{
-				RequiredForImport: true,
-			},
-		},
-	}
 }
 
 func (r *allowedSpacesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -46,10 +34,13 @@ func (r *allowedSpacesResource) Schema(_ context.Context, _ resource.SchemaReque
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages the list of allowed spaces in the SAP BTP CI/CD service.\n\n" +
 			"This is a **bulk-replace** resource: the entire list is replaced on every apply. " +
-			"Spaces not listed will lose access to CI/CD service instances.",
+			"Spaces not listed will lose access to CI/CD service instances.\n\n" +
+			"~> **Warning:** Only one `btpservice_cicd_allowed_spaces` resource must exist per provider configuration. " +
+			"Defining multiple instances will cause them to overwrite each other on every apply, " +
+			"leading to unpredictable state and loss of access for spaces managed by the other instance.",
 		Attributes: map[string]schema.Attribute{
-			"allowed_spaces": schema.ListNestedAttribute{
-				MarkdownDescription: "Ordered list of Cloud Foundry spaces that are permitted to request CI/CD service instances.",
+			"allowed_spaces": schema.SetNestedAttribute{
+				MarkdownDescription: "Set of Cloud Foundry spaces that are permitted to request CI/CD service instances.",
 				Required:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -90,12 +81,6 @@ func (r *allowedSpacesResource) Configure(_ context.Context, req resource.Config
 	r.cli = clients.Cicd
 }
 
-type allowedSpacesIdentityModel struct {
-	ID types.String `tfsdk:"id"`
-}
-
-var allowedSpacesIdentity = allowedSpacesIdentityModel{ID: types.StringValue("allowed_spaces")}
-
 func (r *allowedSpacesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan allowedSpacesModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -116,7 +101,6 @@ func (r *allowedSpacesResource) Create(ctx context.Context, req resource.CreateR
 
 	state := allowedSpacesValueFrom(*result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, allowedSpacesIdentity)...)
 }
 
 func (r *allowedSpacesResource) Read(ctx context.Context, _ resource.ReadRequest, resp *resource.ReadResponse) {
@@ -128,18 +112,12 @@ func (r *allowedSpacesResource) Read(ctx context.Context, _ resource.ReadRequest
 
 	state := allowedSpacesValueFrom(*result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, allowedSpacesIdentity)...)
 }
 
 func (r *allowedSpacesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan allowedSpacesModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if _, err := r.cli.AllowedSpaces.Get(ctx); err != nil {
-		resp.Diagnostics.AddError("Error Reading Allowed Spaces Before Update", err.Error())
 		return
 	}
 
@@ -156,7 +134,6 @@ func (r *allowedSpacesResource) Update(ctx context.Context, req resource.UpdateR
 
 	state := allowedSpacesValueFrom(*result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, allowedSpacesIdentity)...)
 }
 
 func (r *allowedSpacesResource) Delete(ctx context.Context, _ resource.DeleteRequest, resp *resource.DeleteResponse) {

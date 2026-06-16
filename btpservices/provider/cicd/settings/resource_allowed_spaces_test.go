@@ -33,7 +33,7 @@ func TestResourceCicdAllowedSpaces(t *testing.T) {
 resource "btpservice_cicd_allowed_spaces" "test" {
   allowed_spaces = [
     {
-      space_guid = "d794d687-3053-4cba-a942-88e6b13ef035"
+      space_guid = "f9a880bc-20c3-4f71-a51f-882ccdd369c6"
       comment    = "Team Beta space"
     },
   ]
@@ -49,10 +49,6 @@ resource "btpservice_cicd_allowed_spaces" "test" {
 					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_allowed_spaces" "test" {
   allowed_spaces = [
-  {
-      space_guid = "d794d687-3053-4cba-a942-88e6b13ef035"
-      comment    = "Team Beta space"
-    },
     {
       space_guid = "a2bcf2b8-6eda-5b8a-0b7c-8512bb82060f"
       comment    = "Team Alpha space"

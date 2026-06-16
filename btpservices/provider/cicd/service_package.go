@@ -84,7 +84,6 @@ func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResou
 		jobs.NewTriggerListResource,
 
 		// Settings ListResources
-		settings.NewAllowedSpacesListResource,
 	}
 }
 

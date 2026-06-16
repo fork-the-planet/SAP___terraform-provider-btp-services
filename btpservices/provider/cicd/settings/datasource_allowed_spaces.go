@@ -37,8 +37,8 @@ func (d *allowedSpacesDataSource) Schema(_ context.Context, _ datasource.SchemaR
 				MarkdownDescription: "Unique identifier of the data source.",
 				Computed:            true,
 			},
-			"values": schema.ListNestedAttribute{
-				MarkdownDescription: "The list of allowed Cloud Foundry spaces.",
+			"values": schema.SetNestedAttribute{
+				MarkdownDescription: "The set of allowed Cloud Foundry spaces.",
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
