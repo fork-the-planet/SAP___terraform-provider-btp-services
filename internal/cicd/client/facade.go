@@ -7,11 +7,12 @@ import "net/http"
 // CicdClientFacade is the entry point for all CI/CD API operations.
 // Resources store a *CicdClientFacade directly — no interface, mirrors BTP's *btpcli.ClientFacade.
 type CicdClientFacade struct {
-	httpClient   *cicdHTTPClient
-	Credentials  credentialsFacade
-	Repositories repositoriesFacade
-	Jobs         jobsFacade
-	Builds       buildsFacade
+	httpClient    *cicdHTTPClient
+	Credentials   credentialsFacade
+	Repositories  repositoriesFacade
+	Jobs          jobsFacade
+	AllowedSpaces allowedSpacesFacade
+	Builds        buildsFacade
 }
 
 // NewCicdClientFacade constructs a facade using the OAuth2 client-credentials flow
@@ -19,11 +20,12 @@ type CicdClientFacade struct {
 func NewCicdClientFacade(cfg CicdClientConfig) *CicdClientFacade {
 	hc := newCicdHTTPClient(cfg)
 	return &CicdClientFacade{
-		httpClient:   hc,
-		Credentials:  newCredentialsFacade(hc),
-		Repositories: newRepositoriesFacade(hc),
-		Jobs:         newJobsFacade(hc),
-		Builds:       newBuildsFacade(hc),
+		httpClient:    hc,
+		Credentials:   newCredentialsFacade(hc),
+		Repositories:  newRepositoriesFacade(hc),
+		Jobs:          newJobsFacade(hc),
+		AllowedSpaces: newAllowedSpacesFacade(hc),
+		Builds:        newBuildsFacade(hc),
 	}
 }
 
@@ -31,10 +33,11 @@ func NewCicdClientFacade(cfg CicdClientConfig) *CicdClientFacade {
 func NewCicdClientFacadeWithHTTP(cfg CicdClientConfig, httpClient *http.Client) *CicdClientFacade {
 	hc := newCicdHTTPClientWithHTTP(cfg, httpClient)
 	return &CicdClientFacade{
-		httpClient:   hc,
-		Credentials:  newCredentialsFacade(hc),
-		Repositories: newRepositoriesFacade(hc),
-		Jobs:         newJobsFacade(hc),
-		Builds:       newBuildsFacade(hc),
+		httpClient:    hc,
+		Credentials:   newCredentialsFacade(hc),
+		Repositories:  newRepositoriesFacade(hc),
+		Jobs:          newJobsFacade(hc),
+		AllowedSpaces: newAllowedSpacesFacade(hc),
+		Builds:        newBuildsFacade(hc),
 	}
 }

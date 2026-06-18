@@ -132,6 +132,7 @@ var expectedResourceTypes = []string{
 	"btpservice_cicd_repository",
 	"btpservice_cicd_job",
 	"btpservice_cicd_trigger",
+	"btpservice_cicd_allowed_spaces",
 }
 
 // expectedDataSourceTypes lists every data source type name the provider must expose.
@@ -148,6 +149,7 @@ var expectedDataSourceTypes = []string{
 	"btpservice_cicd_trigger",
 	"btpservice_cicd_triggers",
 	"btpservice_cicd_builds",
+	"btpservice_cicd_allowed_spaces",
 }
 
 // expectedListResourceTypes lists every list resource type name the provider must expose.

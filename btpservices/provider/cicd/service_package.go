@@ -13,6 +13,7 @@ import (
 	credentials "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/credentials"
 	jobs "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/jobs"
 	repositories "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/repositories"
+	settings "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/settings"
 )
 
 // ServicePackage wires all CI/CD resources and data sources into the provider.
@@ -37,6 +38,9 @@ func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource 
 		// Job Resources
 		jobs.NewJobResource,
 		jobs.NewTriggerResource,
+
+		// Settings Resources
+		settings.NewAllowedSpacesResource,
 	}
 }
 
@@ -62,6 +66,9 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 		// Job Datasources
 		jobs.NewTriggerDataSource,
 		jobs.NewTriggersDataSource,
+
+		// Settings Datasources
+		settings.NewAllowedSpacesDataSource,
 	}
 }
 
