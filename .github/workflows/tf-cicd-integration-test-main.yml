@@ -35,6 +35,24 @@ jobs:
         with:
           terraform_wrapper: false
 
+      - name: Validate required secrets
+        run: |
+          missing=()
+          [ -z "$BTP_CICD_ENDPOINT" ]     && missing+=(BTP_CICD_ENDPOINT)
+          [ -z "$BTP_CICD_TOKEN_URL" ]    && missing+=(BTP_CICD_TOKEN_URL)
+          [ -z "$BTP_CICD_CLIENT_ID" ]    && missing+=(BTP_CICD_CLIENT_ID)
+          [ -z "$BTP_CICD_CLIENT_SECRET" ] && missing+=(BTP_CICD_CLIENT_SECRET)
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing required secrets: ${missing[*]}"
+            echo "Add them under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+        env:
+          BTP_CICD_ENDPOINT: ${{ secrets.BTP_CICD_ENDPOINT }}
+          BTP_CICD_TOKEN_URL: ${{ secrets.BTP_CICD_TOKEN_URL }}
+          BTP_CICD_CLIENT_ID: ${{ secrets.BTP_CICD_CLIENT_ID }}
+          BTP_CICD_CLIENT_SECRET: ${{ secrets.BTP_CICD_CLIENT_SECRET }}
+
       - name: Build and install local provider
         run: go mod tidy && make install
 
