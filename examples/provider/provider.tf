@@ -1,7 +1,8 @@
 terraform {
   required_providers {
     btpservice = {
-      source = "sap/btp-services"
+      source  = "sap/btp-services"
+      version = "0.1.0-beta1"
     }
   }
 }
