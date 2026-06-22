@@ -50,7 +50,7 @@ docs-generate:
 docs-subcategory: docs-generate
 	@while IFS=: read -r prefix label || [ -n "$$prefix" ]; do \
 		case "$$prefix" in \#*|"") continue ;; esac; \
-		for dir in docs/resources docs/data-sources docs/list-resources docs/ephemeral-resources; do \
+		for dir in docs/resources docs/data-sources docs/list-resources docs/ephemeral-resources docs/actions; do \
 			[ -d "$$dir" ] || continue; \
 			for f in $$dir/$${prefix}_*.md; do \
 				[ -f "$$f" ] || continue; \
