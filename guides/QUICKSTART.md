@@ -13,7 +13,6 @@ The following services are currently supported:
 ## Prerequisites
 
 - Access to an [SAP BTP account](https://account.hana.ondemand.com/)
-- [Terraform](https://developer.hashicorp.com/terraform/downloads) installed (v1.0.0 or later)
 - Credentials for the service(s) you want to manage — see the service-specific sections below
 
 ## Authentication
@@ -27,7 +26,7 @@ terraform {
   required_providers {
     btpservice = {
       source  = "SAP/btp-services"
-      version = "~> 0.1"
+      version = "<latest>" # Replace <latest> with the latest provider version available on the Terraform Registry.
     }
   }
 }
